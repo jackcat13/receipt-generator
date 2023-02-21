@@ -1,0 +1,205 @@
+<!DOCTYPE html><html lang="en"><head>
+        <meta charset="utf-8">
+        <title>Codeur Facile</title>
+        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/default.min.css">
+        <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css?family=Material+Icons&amp;display=block" rel="stylesheet">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script>
+        <script src="https://kit.fontawesome.com/f05c8837f2.js" crossorigin="anonymous"></script>
+        <script async="" src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3827329166076060" crossorigin="anonymous"></script>
+        <style id="globalStyle">
+            @keyframes first_text_anim {
+                0%{
+                    
+                }
+                30%{
+                    letter-spacing: 25px;
+                }
+                85%{
+                    letter-spacing: 8px;
+                }
+            }
+            @keyframes second_text_anim {
+                0% {
+                    opacity: 0;
+                }
+                100% {
+                    opacity: 100;
+                }
+            }
+            @keyframes link_opacity {
+                0% {
+                    opacity: 1;
+                }
+                100% {
+                    opacity: 0.6;
+                }
+            }
+            @font-face {
+                font-family: "nexa_lightregular";
+                src: url("./fonts/nexa_light-webfont.woff") format("woff"), url("./fonts/nexa_light-webfont.woff2") format("woff2");
+                font-weight: normal;
+                font-style: normal;
+            }
+            html{
+                background-color: black;
+                color: #d1d1d1;
+                font-family: nexa_lightregular, Roboto;
+                font-size: 20px;
+                text-align: justify;
+                letter-spacing: 2px;
+                margin: 40px;
+            }
+            img:hover{
+                cursor: pointer;
+            }
+            h1{
+                color: #ff5100;
+                font-size: 32px;
+                margin-top: 30px;
+            }
+            h2{
+                font-size: 26px;
+            }
+            a{
+                color: #0e76a8;
+            }
+            li{
+                margin-bottom: 5px;
+            }
+            .notUnderlinedLink{
+                text-decoration: none;
+            }
+            .notUnderlinedLink:hover{
+                animation: link_opacity 1s forwards;
+            }
+            label{
+                margin-right: 50px;
+            }
+        </style>
+        <style id="articlesStyle">
+            #receiptGenerator div{
+                margin-top: 20px;
+            }
+        </style>
+        <style id="footerStyle">
+            footer{
+                position: fixed;
+                top: 50px;
+                right: 40px;
+            }
+            footer div{
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            .socialMediaBlockWrapper{
+                position: relative;
+                display: flex;
+                transform-style: preserve-3d;
+            }
+            .socialMediaBlockWrapper .socialMediaBlock{
+                position: relative;
+                list-style: none;
+                height: 60px;
+                margin: 0px 20px;
+            }
+            .socialMediaBlock:before{
+                content: '';
+                position: absolute;
+                bottom: -10px;
+                left: -5px;
+                width: 100%;
+                height: 10px;
+                background: #2a2a2a;
+                transform-origin: top;
+                transform: skewX(-41deg);
+            }
+            .socialMediaBlock:after{
+                content: '';
+                position: absolute;
+                top: 5px;
+                left: -9px;
+                width: 9px;
+                height: 100%;
+                background: #2a2a2a;
+                transform-origin: right;
+                transform: skewY(-49deg);
+            }
+            .socialMediaBlock span {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                display: flex !important;
+                background: #2a2a2a;
+                justify-content: center;
+                align-items: center;
+                color: #fff;
+                font-size: 30px !important;
+                transition: 1.5s ease-out;
+            }
+            .socialMediaBlock:hover span {
+                z-index: 1000;
+                transition: .6s;
+                color: #fff;
+                box-shadow: -1px 1px 1px rgba(0, 0, 0, .5);
+            }
+            .socialMediaBlock:hover span:nth-child(5) {
+                transform: translate(20px, -20px);
+                opacity: 1;
+            }
+            .socialMediaBlock:hover span:nth-child(4) {
+                transform: translate(15px, -15px);
+                opacity: .8;
+            }
+            .socialMediaBlock:hover span:nth-child(3) {
+                transform: translate(10px, -10px);
+                opacity: .6;
+            }
+            .socialMediaBlock:hover span:nth-child(2) {
+                transform: translate(5px, -5px);
+                opacity: .4;
+            }
+            .socialMediaBlock:hover span:nth-child(1) {
+                transform: translate(0px, 0px);
+                opacity: .2;
+            }
+            .socialMediaBlock:nth-child(1):hover span {
+                background: #1DA1F2 !important;
+                box-shadow: 0px 5px 12px #1da0f27a;
+            }
+
+            .socialMediaBlock:nth-child(2):hover span {
+                background: #2C3456 !important;
+                box-shadow: 0px 5px 12px #2c3456c4;
+            }
+
+            .socialMediaBlock:nth-child(3):hover span {
+                background: #8a3ab9 !important;
+                box-shadow: 0px 5px 12px #8a3ab9b6;
+            }
+
+            .socialMediaBlock:nth-child(4):hover span {
+                background: #0e76a8 !important;
+                box-shadow: 0px 5px 12px #0e77a8b9;
+            }
+            .socialMediaBlock:nth-child(5):hover span {
+                background: #c9510c !important;
+                box-shadow: 0px 5px 12px #c9510c5d;
+            }
+        </style>
+    
+<link rel="preload" href="/my-website/receipt-generator-2ae552c69a455005_bg.wasm" as="fetch" type="application/wasm" crossorigin="">
+<link rel="modulepreload" href="/my-website/receipt-generator-2ae552c69a455005.js"></head>
+    <body>
+        <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3827329166076060" data-ad-slot="8135880393" data-ad-format="auto" data-full-width-responsive="true"></ins>
+        <script>
+            (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
+    
+
+<script type="module">import init from '/my-website/receipt-generator-2ae552c69a455005.js';init('/my-website/receipt-generator-2ae552c69a455005_bg.wasm');</script></body></html>
