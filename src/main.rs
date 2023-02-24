@@ -1,5 +1,7 @@
 mod components;
+mod model;
 
+use components::receipt_generated_component::ReceiptGeneratedComponent;
 use yew::functional::*;
 use yew::prelude::*;
 use yew_router::prelude::*;
@@ -12,6 +14,8 @@ use components::social_media_block_component::SocialMediaBlockComponent;
 enum Route {
     #[at("/")]
     Home,
+    #[at("/facture")]
+    Facture,
     #[not_found]
     #[at("/404")]
     NotFound,
@@ -24,6 +28,15 @@ fn home() -> Html {
             <div id="receiptGenerator">
                 <ReceiptGeneratorComponent />
             </div>
+            {footer()}
+        </>
+    }
+}
+
+fn facture() -> Html {
+    html! {
+        <>
+            <ReceiptGeneratedComponent />
         </>
     }
 }
@@ -39,10 +52,15 @@ fn footer() -> Html {
     }
 }
 
+fn not_found() -> Html {
+    html! { <h1>{ "404" }</h1> }
+}
+
 fn switch(routes: Route) -> Html {
     match routes {
         Route::Home => home(),
-        Route::NotFound => html! { <h1>{ "404" }</h1> },
+        Route::Facture => html! { facture() },
+        Route::NotFound => not_found(),
     }
 }
 
@@ -53,7 +71,6 @@ fn app() -> Html {
             <HashRouter>
                 <Switch<Route> render={switch} />
             </HashRouter>
-            {footer()}
         </>
     }
 }
