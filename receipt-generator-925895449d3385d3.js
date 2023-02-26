@@ -781,16 +781,16 @@ function getImports() {
         const ret = wasm.memory;
         return addHeapObject(ret);
     };
-    imports.wbg.__wbindgen_closure_wrapper735 = function(arg0, arg1, arg2) {
-        const ret = makeMutClosure(arg0, arg1, 322, __wbg_adapter_34);
+    imports.wbg.__wbindgen_closure_wrapper765 = function(arg0, arg1, arg2) {
+        const ret = makeMutClosure(arg0, arg1, 344, __wbg_adapter_34);
         return addHeapObject(ret);
     };
-    imports.wbg.__wbindgen_closure_wrapper1092 = function(arg0, arg1, arg2) {
-        const ret = makeMutClosure(arg0, arg1, 451, __wbg_adapter_37);
+    imports.wbg.__wbindgen_closure_wrapper1122 = function(arg0, arg1, arg2) {
+        const ret = makeMutClosure(arg0, arg1, 473, __wbg_adapter_37);
         return addHeapObject(ret);
     };
-    imports.wbg.__wbindgen_closure_wrapper1156 = function(arg0, arg1, arg2) {
-        const ret = makeMutClosure(arg0, arg1, 484, __wbg_adapter_40);
+    imports.wbg.__wbindgen_closure_wrapper1186 = function(arg0, arg1, arg2) {
+        const ret = makeMutClosure(arg0, arg1, 506, __wbg_adapter_40);
         return addHeapObject(ret);
     };
 
@@ -829,7 +829,7 @@ function initSync(module) {
 
 async function init(input) {
     if (typeof input === 'undefined') {
-        input = new URL('receipt-generator-f82aa2eb0135f3b3_bg.wasm', import.meta.url);
+        input = new URL('receipt-generator-925895449d3385d3_bg.wasm', import.meta.url);
     }
     const imports = getImports();
 
