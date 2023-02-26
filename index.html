@@ -91,6 +91,7 @@
             }
             #generatedReceipt{
                 color: black;
+                width: 21cm;
             }
             #paid{
                 font-size: 35px;
@@ -111,14 +112,47 @@
             }
             #receiptTopRight{
                 float: right;
+                text-align: right;
             }
             #clientFacturationRight{
                 width: 21cm;
                 text-align: right;
             }
+            table{
+                border-collapse: collapse;
+                table-layout: auto;
+                width: 21cm;
+                margin-top: 40px;
+            }
+            table tr{
+                width: 21cm;
+            }
+            th, td{
+                padding: 10px;
+            }
+            .designationLine{
+                border-bottom: solid 1px #dddddd;
+            }
+            #TotalFactureRight{
+                width: 10.5cm;
+                float: right;
+                border-top: solid 1px #dddddd;
+            }
+            .greenBackground{
+                background-color: #d3f191;
+            }
+            .factureTitle{
+                color: black;
+                text-transform: uppercase;
+            }
             #receiptFooter{
                 width: 21cm;
                 text-align: center;
+                border-top: solid 1px #dddddd;
+                font-size: 12px;
+                letter-spacing: normal;
+                color: #666666;
+                padding-top: 20px;
             }
             @media screen {
                 #receiptFooter{
@@ -242,8 +276,8 @@
             }
         </style>
     
-<link rel="preload" href="/receipt-generator/receipt-generator-8d1649419dbc15eb_bg.wasm" as="fetch" type="application/wasm" crossorigin="">
-<link rel="modulepreload" href="/receipt-generator/receipt-generator-8d1649419dbc15eb.js"></head>
+<link rel="preload" href="/receipt-generator/receipt-generator-f82aa2eb0135f3b3_bg.wasm" as="fetch" type="application/wasm" crossorigin="">
+<link rel="modulepreload" href="/receipt-generator/receipt-generator-f82aa2eb0135f3b3.js"></head>
     <body>
         <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3827329166076060" data-ad-slot="8135880393" data-ad-format="auto" data-full-width-responsive="true"></ins>
         <script>
@@ -251,4 +285,4 @@
         </script>
     
 
-<script type="module">import init from '/receipt-generator/receipt-generator-8d1649419dbc15eb.js';init('/receipt-generator/receipt-generator-8d1649419dbc15eb_bg.wasm');</script></body></html>
+<script type="module">import init from '/receipt-generator/receipt-generator-f82aa2eb0135f3b3.js';init('/receipt-generator/receipt-generator-f82aa2eb0135f3b3_bg.wasm');</script></body></html>
