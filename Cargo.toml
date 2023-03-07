@@ -9,8 +9,10 @@ edition = "2021"
 chrono = "0.4.23"
 gloo = "0.8.0"
 js-sys = "0.3.61"
+regex = "1.7.1"
 strum = { version = "0.24.1", features = ["derive"] }
 strum_macros = "0.24"
+wasm-bindgen-test = "0.3.34"
 web-sys = { version = "0.3.61", features = ["FormData", "HtmlFormElement"] }
 yew = { version = "0.20", features = ["csr"] }
 yew-router = "0.17.0"

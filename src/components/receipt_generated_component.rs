@@ -10,7 +10,17 @@ pub fn receipt_generated_component() -> Html {
     let location = use_location().expect("Could not resolve location");
     let queries: HashMap<String, String> =
         location.query().expect("Could not retrieve get parameters");
-    let facture = FactureDto::from_queries(&queries);
+    let facture_result = FactureDto::from_queries(&queries);
+    if facture_result.is_err() {
+        return html! {
+            <>
+                <div id="generatedReceipt">
+                    {facture_result.err().unwrap()}
+                </div>
+            </>
+        };
+    }
+    let facture = facture_result.unwrap();
     html! {
         <>
             <div id="generatedReceipt">

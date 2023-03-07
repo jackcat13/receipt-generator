@@ -27,9 +27,10 @@ jobs:
           profile: minimal
           toolchain: stable
           override: true
-      - uses: actions-rs/cargo@v1
+      - uses: jetli/wasm-pack-action@v0.4.0
         with:
-          command: test
+          version: 'latest'
+          command: wasm-pack test --node
 
   fmt:
     name: Rustfmt
