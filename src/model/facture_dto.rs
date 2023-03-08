@@ -1,11 +1,12 @@
 use std::collections::HashMap;
 
 use chrono::NaiveDate;
+use regex::Regex;
 use web_sys::FormData;
 
 use crate::components::constants::*;
 
-#[derive(Clone)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct FactureDto {
     pub number: usize,
     pub date: NaiveDate,
@@ -26,155 +27,114 @@ pub struct FactureDto {
 }
 
 impl FactureDto {
-    pub fn from_form_data(form_data: &FormData) -> FactureDto {
+    pub fn from_form_data(form_data: &FormData) -> Result<FactureDto, String> {
         let form_data = form_data.clone();
-        FactureDto {
-            number: form_data
-                .get(FACTURE_NUMBER_QUERY)
-                .as_string()
-                .expect("Failed to init facture number")
-                .parse()
-                .expect("Failed to parse facture number"),
-            date: to_naive_date(
-                &form_data
-                    .get(FACTURE_DATE_QUERY)
-                    .as_string()
-                    .expect("Failed to init facture date"),
-            ),
-            date_emited: to_naive_date(
-                &form_data
-                    .get(FACTURE_DATE_EMITED_QUERY)
-                    .as_string()
-                    .expect("Failed to init facture date emited"),
-            ),
-            acompte: form_data
-                .get(FACTURE_ACOMPTE)
-                .as_string()
-                .expect("Failed to init facture acompte"),
-            is_paid: form_data.get(FACTURE_IS_PAID).as_string() == Some("on".to_string()),
-            project_name: form_data
-                .get(FACTURE_PROJECT_NAME)
-                .as_string()
-                .expect("Failed to init project name"),
-            project_adress: form_data
-                .get(FACTURE_PROJECT_ADRESS)
-                .as_string()
-                .expect("Failed to init project adress"),
-            project_mail: form_data
-                .get(FACTURE_PROJECT_EMAIL)
-                .as_string()
-                .expect("Failed to init project mail"),
-            project_tel: form_data
-                .get(FACTURE_PROJECT_TEL)
-                .as_string()
-                .expect("Failed to init project tel"),
-            project_website: form_data
-                .get(FACTURE_PROJECT_WEBSITE)
-                .as_string()
-                .expect("Failed to init project website"),
-            client_name: form_data
-                .get(FACTURE_CLIENT_NAME)
-                .as_string()
-                .expect("Failed to init client name"),
-            client_adress: form_data
-                .get(FACTURE_CLIENT_ADRESS)
-                .as_string()
-                .expect("Failed to init client adress"),
-            client_tel: form_data
-                .get(FACTURE_CLIENT_TEL)
-                .as_string()
-                .expect("Failed to init client tel"),
-            client_tva: form_data
-                .get(FACTURE_CLIENT_TVA_INTRACOMMUNAUTAIRE)
-                .as_string()
-                .expect("Failed to init tva client"),
-            client_devis: form_data
-                .get(FACTURE_CLIENT_DEVIS)
-                .as_string()
-                .expect("Failed to init client devis"),
-            amount: form_data
-                .get(FACTURE_AMOUNT)
-                .as_string()
-                .expect("Failed to init facture amount")
-                .parse()
-                .expect("Failed to parse amount"),
-        }
+        let number = resolve_number_form(&form_data);
+        number.clone()?;
+        let date = resolve_date_form(&form_data, FACTURE_DATE_QUERY);
+        date.clone()?;
+        let date_emited = resolve_date_form(&form_data, FACTURE_DATE_EMITED_QUERY);
+        date_emited.clone()?;
+        let acompte = resolve_acompte_form(&form_data);
+        acompte.clone()?;
+        let is_paid = resolve_is_paid_form(&form_data);
+        is_paid.clone()?;
+        let project_name = resolve_project_name_form(&form_data);
+        project_name.clone()?;
+        let project_adress = resolve_project_adress_form(&form_data);
+        project_adress.clone()?;
+        let project_mail = resolve_project_mail_form(&form_data);
+        project_mail.clone()?;
+        let project_tel = resolve_project_tel_form(&form_data);
+        project_tel.clone()?;
+        let project_website = resolve_project_website_form(&form_data);
+        project_website.clone()?;
+        let client_name = resolve_client_name_form(&form_data);
+        client_name.clone()?;
+        let client_adress = resolve_client_adress_form(&form_data);
+        client_adress.clone()?;
+        let client_tel = resolve_client_tel_form(&form_data);
+        client_tel.clone()?;
+        let client_tva = resolve_client_tva_form(&form_data);
+        client_tva.clone()?;
+        let client_devis = resolve_client_devis_form(&form_data);
+        client_devis.clone()?;
+        let amount = resolve_amount_form(&form_data);
+        amount.clone()?;
+        let facture_dto = FactureDto {
+            number: number.unwrap(),
+            date: date.unwrap(),
+            date_emited: date_emited.unwrap(),
+            acompte: acompte.unwrap(),
+            is_paid: is_paid.unwrap(),
+            project_name: project_name.unwrap(),
+            project_adress: project_adress.unwrap(),
+            project_mail: project_mail.unwrap(),
+            project_tel: project_tel.unwrap(),
+            project_website: project_website.unwrap(),
+            client_name: client_name.unwrap(),
+            client_adress: client_adress.unwrap(),
+            client_tel: client_tel.unwrap(),
+            client_tva: client_tva.unwrap(),
+            client_devis: client_devis.unwrap(),
+            amount: amount.unwrap(),
+        };
+        Ok(facture_dto)
     }
 
-    pub fn from_queries(queries: &HashMap<String, String>) -> FactureDto {
+    pub fn from_queries(queries: &HashMap<String, String>) -> Result<FactureDto, String> {
         let queries = queries.clone();
-        FactureDto {
-            number: queries
-                .get(FACTURE_NUMBER_QUERY)
-                .expect("Failed to init facture number")
-                .parse()
-                .expect("Failed to parse facture number"),
-            date: to_naive_date(
-                queries
-                    .get(FACTURE_DATE_QUERY)
-                    .expect("Failed to init facture date"),
-            ),
-            date_emited: to_naive_date(
-                queries
-                    .get(FACTURE_DATE_EMITED_QUERY)
-                    .expect("Failed to init facture date emited"),
-            ),
-            acompte: queries
-                .get(FACTURE_ACOMPTE)
-                .expect("Failed to init facture acompte")
-                .to_string(),
-            is_paid: queries
-                .get(FACTURE_IS_PAID)
-                .expect("Failed to init facture is paid")
-                .parse::<bool>()
-                .expect("Failed to parse facture is paid"),
-            project_name: queries
-                .get(FACTURE_PROJECT_NAME)
-                .expect("Failed to init project name")
-                .to_string(),
-            project_adress: queries
-                .get(FACTURE_PROJECT_ADRESS)
-                .expect("Failed to init project adress")
-                .to_string(),
-            project_mail: queries
-                .get(FACTURE_PROJECT_EMAIL)
-                .expect("Failed to init project mail")
-                .to_string(),
-            project_tel: queries
-                .get(FACTURE_PROJECT_TEL)
-                .expect("Failed to init project tel")
-                .to_string(),
-            project_website: queries
-                .get(FACTURE_PROJECT_WEBSITE)
-                .expect("Failed to init project website")
-                .to_string(),
-            client_name: queries
-                .get(FACTURE_CLIENT_NAME)
-                .expect("Failed to init client name")
-                .to_string(),
-            client_adress: queries
-                .get(FACTURE_CLIENT_ADRESS)
-                .expect("Failed to init client adress")
-                .to_string(),
-            client_tel: queries
-                .get(FACTURE_CLIENT_TEL)
-                .expect("Failed to init client tel")
-                .to_string(),
-            client_tva: queries
-                .get(FACTURE_CLIENT_TVA_INTRACOMMUNAUTAIRE)
-                .expect("Failed to init tva client")
-                .to_string(),
-            client_devis: queries
-                .get(FACTURE_CLIENT_DEVIS)
-                .expect("Failed to init client devis")
-                .to_string(),
-            amount: queries
-                .get(FACTURE_AMOUNT)
-                .expect("Failed to init facture amount")
-                .to_string()
-                .parse()
-                .expect("Failed to parse amount"),
-        }
+        let number = resolve_number_queries(&queries);
+        number.clone()?;
+        let date = resolve_date_queries(&queries, FACTURE_DATE_QUERY);
+        date.clone()?;
+        let date_emited = resolve_date_queries(&queries, FACTURE_DATE_EMITED_QUERY);
+        date_emited.clone()?;
+        let acompte = resolve_acompte_queries(&queries);
+        acompte.clone()?;
+        let is_paid = resolve_is_paid_queries(&queries);
+        is_paid.clone()?;
+        let project_name = resolve_project_name_queries(&queries);
+        project_name.clone()?;
+        let project_adress = resolve_project_adress_queries(&queries);
+        project_adress.clone()?;
+        let project_mail = resolve_project_mail_queries(&queries);
+        project_mail.clone()?;
+        let project_tel = resolve_project_tel_queries(&queries);
+        project_tel.clone()?;
+        let project_website = resolve_project_website_queries(&queries);
+        project_website.clone()?;
+        let client_name = resolve_client_name_queries(&queries);
+        client_name.clone()?;
+        let client_adress = resolve_client_adress_queries(&queries);
+        client_adress.clone()?;
+        let client_tel = resolve_client_tel_queries(&queries);
+        client_tel.clone()?;
+        let client_tva = resolve_client_tva_queries(&queries);
+        client_tva.clone()?;
+        let client_devis = resolve_client_devis_queries(&queries);
+        client_devis.clone()?;
+        let amount = resolve_amount_queries(&queries);
+        amount.clone()?;
+        let facture_dto = FactureDto {
+            number: number.unwrap(),
+            date: date.unwrap(),
+            date_emited: date_emited.unwrap(),
+            acompte: acompte.unwrap(),
+            is_paid: is_paid.unwrap(),
+            project_name: project_name.unwrap(),
+            project_adress: project_adress.unwrap(),
+            project_mail: project_mail.unwrap(),
+            project_tel: project_tel.unwrap(),
+            project_website: project_website.unwrap(),
+            client_name: client_name.unwrap(),
+            client_adress: client_adress.unwrap(),
+            client_tel: client_tel.unwrap(),
+            client_tva: client_tva.unwrap(),
+            client_devis: client_devis.unwrap(),
+            amount: amount.unwrap(),
+        };
+        Ok(facture_dto)
     }
 
     pub fn to_queries(&self) -> HashMap<String, String> {
@@ -209,6 +169,1305 @@ impl FactureDto {
     }
 }
 
-fn to_naive_date(expect: &str) -> NaiveDate {
-    NaiveDate::parse_from_str(expect, DATE_FORMAT).expect("Failed to parse date")
+fn resolve_number_form(form_data: &FormData) -> Result<usize, String> {
+    let number_str = form_data.get(FACTURE_NUMBER_QUERY).as_string();
+    if let Some(number_str) = number_str {
+        number_str
+            .parse()
+            .or(Err(format!("Failed to parse {number_str} into usize")))
+    } else {
+        Err(format!("Failed to get {FACTURE_NUMBER_QUERY}"))
+    }
+}
+
+fn resolve_number_queries(queries: &HashMap<String, String>) -> Result<usize, String> {
+    let number_str = queries.get(FACTURE_NUMBER_QUERY);
+    if let Some(number_str) = number_str {
+        number_str
+            .parse()
+            .or(Err(format!("Failed to parse {number_str} into usize")))
+    } else {
+        Err(format!("Failed to get {FACTURE_NUMBER_QUERY}"))
+    }
+}
+
+fn resolve_date_form(form_data: &FormData, form_field: &str) -> Result<NaiveDate, String> {
+    let date_str = form_data.get(form_field).as_string();
+    if let Some(date_str) = date_str {
+        to_naive_date(&date_str)
+    } else {
+        Err(format!("Failed to get {form_field}"))
+    }
+}
+
+fn resolve_date_queries(
+    queries: &HashMap<String, String>,
+    queries_field: &str,
+) -> Result<NaiveDate, String> {
+    let date_str = queries.get(queries_field);
+    if let Some(date_str) = date_str {
+        to_naive_date(date_str)
+    } else {
+        Err(format!("Failed to get {queries_field}"))
+    }
+}
+
+fn to_naive_date(date_str: &str) -> Result<NaiveDate, String> {
+    NaiveDate::parse_from_str(date_str, DATE_FORMAT).or(Err(format!(
+        "Could not parse date from string {}",
+        date_str
+    )))
+}
+
+fn resolve_acompte_form(form_data: &FormData) -> Result<String, String> {
+    let acompte_str = form_data.get(FACTURE_ACOMPTE).as_string();
+    acompte_check(acompte_str)
+}
+
+fn resolve_acompte_queries(queries: &HashMap<String, String>) -> Result<String, String> {
+    let acompte_str = queries.get(FACTURE_ACOMPTE);
+    if let Some(acompte_str) = acompte_str {
+        acompte_check(Option::from(acompte_str.to_string()))
+    } else {
+        Err(format!("Failed to get {FACTURE_ACOMPTE}"))
+    }
+}
+
+fn acompte_check(acompte_str: Option<String>) -> Result<String, String> {
+    if let Some(acompte_str) = acompte_str {
+        if acompte_str == "comptant" || acompte_str == "avec acompte" {
+            Ok(acompte_str)
+        } else {
+            Err("Value must be either `acompte` or `avec acompte`".to_string())
+        }
+    } else {
+        Err(format!("Failed to get {FACTURE_ACOMPTE}"))
+    }
+}
+
+fn resolve_is_paid_form(form_data: &FormData) -> Result<bool, String> {
+    let is_paid_str = form_data.get(FACTURE_IS_PAID).as_string();
+    if let Some(is_paid_str) = is_paid_str {
+        if is_paid_str == "on" {
+            Ok(true)
+        } else {
+            Ok(false)
+        }
+    } else {
+        Ok(false)
+    }
+}
+
+fn resolve_is_paid_queries(queries: &HashMap<String, String>) -> Result<bool, String> {
+    let is_paid_str = queries.get(FACTURE_IS_PAID);
+    if let Some(is_paid_str) = is_paid_str {
+        if is_paid_str == "true" {
+            Ok(true)
+        } else {
+            Ok(false)
+        }
+    } else {
+        Ok(false)
+    }
+}
+
+fn resolve_project_name_form(form_data: &FormData) -> Result<String, String> {
+    let project_name_str = form_data.get(FACTURE_PROJECT_NAME).as_string();
+    not_empty_check(project_name_str, FACTURE_PROJECT_NAME)
+}
+
+fn resolve_project_name_queries(queries: &HashMap<String, String>) -> Result<String, String> {
+    let project_name_str = queries.get(FACTURE_PROJECT_NAME);
+    if let Some(project_name_str) = project_name_str {
+        not_empty_check(
+            Option::from(project_name_str.to_string()),
+            FACTURE_PROJECT_NAME,
+        )
+    } else {
+        Err(format!("Failed to get {FACTURE_PROJECT_NAME}"))
+    }
+}
+
+fn not_empty_check(field_str: Option<String>, field_name: &str) -> Result<String, String> {
+    if let Some(field_str) = field_str {
+        if field_str.is_empty() {
+            return Err(format!("{field_name} value can't be null"));
+        }
+        Ok(field_str)
+    } else {
+        Err(format!("Failed to get {field_name}"))
+    }
+}
+
+fn resolve_project_adress_form(form_data: &FormData) -> Result<String, String> {
+    let project_adress_str = form_data.get(FACTURE_PROJECT_ADRESS).as_string();
+    not_empty_check(project_adress_str, FACTURE_PROJECT_ADRESS)
+}
+
+fn resolve_project_adress_queries(queries: &HashMap<String, String>) -> Result<String, String> {
+    let project_adress_str = queries.get(FACTURE_PROJECT_ADRESS);
+    if let Some(project_adress_str) = project_adress_str {
+        not_empty_check(
+            Option::from(project_adress_str.to_string()),
+            FACTURE_PROJECT_ADRESS,
+        )
+    } else {
+        Err(format!("Failed to get {FACTURE_PROJECT_ADRESS}"))
+    }
+}
+
+fn resolve_project_mail_form(form_data: &FormData) -> Result<String, String> {
+    let project_mail_str = form_data.get(FACTURE_PROJECT_EMAIL).as_string();
+    email_check(project_mail_str, FACTURE_PROJECT_EMAIL)
+}
+
+fn resolve_project_mail_queries(queries: &HashMap<String, String>) -> Result<String, String> {
+    let project_mail_str = queries.get(FACTURE_PROJECT_EMAIL);
+    if let Some(project_mail_str) = project_mail_str {
+        email_check(
+            Option::from(project_mail_str.to_string()),
+            FACTURE_PROJECT_EMAIL,
+        )
+    } else {
+        Err(format!("Failed to get {FACTURE_PROJECT_EMAIL}"))
+    }
+}
+
+fn email_check(mail_str: Option<String>, field_name: &str) -> Result<String, String> {
+    if let Some(mail_str) = mail_str {
+        let email_regex = Regex::new(
+            r"^([a-z0-9_+]([a-z0-9_+.]*[a-z0-9_+])?)@([a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,6})",
+        )
+        .unwrap();
+        if !email_regex.is_match(&mail_str) {
+            return Err(format!(
+                "{field_name} value must have format like `project@gmail.com`"
+            ));
+        }
+        Ok(mail_str)
+    } else {
+        Err(format!("Failed to get {field_name}"))
+    }
+}
+
+fn resolve_project_tel_form(form_data: &FormData) -> Result<String, String> {
+    let project_tel_str = form_data.get(FACTURE_PROJECT_TEL).as_string();
+    not_empty_check(project_tel_str, FACTURE_PROJECT_TEL)
+}
+
+fn resolve_project_tel_queries(queries: &HashMap<String, String>) -> Result<String, String> {
+    let project_tel_str = queries.get(FACTURE_PROJECT_TEL);
+    if let Some(project_tel_str) = project_tel_str {
+        not_empty_check(
+            Option::from(project_tel_str.to_string()),
+            FACTURE_PROJECT_TEL,
+        )
+    } else {
+        Err(format!("Failed to get {FACTURE_PROJECT_TEL}"))
+    }
+}
+
+fn resolve_project_website_form(form_data: &FormData) -> Result<String, String> {
+    let project_website_str = form_data.get(FACTURE_PROJECT_WEBSITE).as_string();
+    project_website_str.ok_or(format!("Failed to get {FACTURE_PROJECT_WEBSITE}"))
+}
+
+fn resolve_project_website_queries(queries: &HashMap<String, String>) -> Result<String, String> {
+    let project_website_str = queries.get(FACTURE_PROJECT_WEBSITE);
+    if let Some(project_website_str) = project_website_str {
+        Ok(project_website_str.to_string())
+    } else {
+        Err(format!("Failed to get {FACTURE_PROJECT_WEBSITE}"))
+    }
+}
+
+fn resolve_client_name_form(form_data: &FormData) -> Result<String, String> {
+    let client_name_str = form_data.get(FACTURE_CLIENT_NAME).as_string();
+    not_empty_check(client_name_str, FACTURE_CLIENT_NAME)
+}
+
+fn resolve_client_name_queries(queries: &HashMap<String, String>) -> Result<String, String> {
+    let client_name_str = queries.get(FACTURE_CLIENT_NAME);
+    if let Some(client_name_str) = client_name_str {
+        not_empty_check(
+            Option::from(client_name_str.to_string()),
+            FACTURE_CLIENT_NAME,
+        )
+    } else {
+        Err(format!("Failed to get {FACTURE_CLIENT_NAME}"))
+    }
+}
+
+fn resolve_client_adress_form(form_data: &FormData) -> Result<String, String> {
+    let client_adress_str = form_data.get(FACTURE_CLIENT_ADRESS).as_string();
+    not_empty_check(client_adress_str, FACTURE_CLIENT_ADRESS)
+}
+
+fn resolve_client_adress_queries(queries: &HashMap<String, String>) -> Result<String, String> {
+    let client_adress_str = queries.get(FACTURE_CLIENT_ADRESS);
+    if let Some(client_adress_str) = client_adress_str {
+        not_empty_check(
+            Option::from(client_adress_str.to_string()),
+            FACTURE_CLIENT_ADRESS,
+        )
+    } else {
+        Err(format!("Failed to get {FACTURE_CLIENT_ADRESS}"))
+    }
+}
+
+fn resolve_client_tel_form(form_data: &FormData) -> Result<String, String> {
+    let client_tel_str = form_data.get(FACTURE_CLIENT_TEL).as_string();
+    not_empty_check(client_tel_str, FACTURE_CLIENT_TEL)
+}
+
+fn resolve_client_tel_queries(queries: &HashMap<String, String>) -> Result<String, String> {
+    let client_tel_str = queries.get(FACTURE_CLIENT_TEL);
+    if let Some(client_tel_str) = client_tel_str {
+        not_empty_check(Option::from(client_tel_str.to_string()), FACTURE_CLIENT_TEL)
+    } else {
+        Err(format!("Failed to get {FACTURE_CLIENT_TEL}"))
+    }
+}
+
+fn resolve_client_tva_form(form_data: &FormData) -> Result<String, String> {
+    let client_tva_str = form_data
+        .get(FACTURE_CLIENT_TVA_INTRACOMMUNAUTAIRE)
+        .as_string();
+    not_empty_check(client_tva_str, FACTURE_CLIENT_TVA_INTRACOMMUNAUTAIRE)
+}
+
+fn resolve_client_tva_queries(queries: &HashMap<String, String>) -> Result<String, String> {
+    let client_tva_str = queries.get(FACTURE_CLIENT_TVA_INTRACOMMUNAUTAIRE);
+    if let Some(client_tva_str) = client_tva_str {
+        not_empty_check(
+            Option::from(client_tva_str.to_string()),
+            FACTURE_CLIENT_TVA_INTRACOMMUNAUTAIRE,
+        )
+    } else {
+        Err(format!(
+            "Failed to get {FACTURE_CLIENT_TVA_INTRACOMMUNAUTAIRE}"
+        ))
+    }
+}
+
+fn resolve_client_devis_form(form_data: &FormData) -> Result<String, String> {
+    let client_devis_str = form_data.get(FACTURE_CLIENT_DEVIS).as_string();
+    not_empty_check(client_devis_str, FACTURE_CLIENT_DEVIS)
+}
+
+fn resolve_client_devis_queries(queries: &HashMap<String, String>) -> Result<String, String> {
+    let client_devis_str = queries.get(FACTURE_CLIENT_DEVIS);
+    if let Some(client_devis_str) = client_devis_str {
+        not_empty_check(
+            Option::from(client_devis_str.to_string()),
+            FACTURE_CLIENT_DEVIS,
+        )
+    } else {
+        Err(format!("Failed to get {FACTURE_CLIENT_DEVIS}"))
+    }
+}
+
+fn resolve_amount_form(form_data: &FormData) -> Result<f64, String> {
+    let amount_str = form_data.get(FACTURE_AMOUNT).as_string();
+    if let Some(amount_str) = amount_str {
+        let maybe_f = amount_str.parse::<f64>();
+        maybe_f
+            .ok()
+            .ok_or(format!("{FACTURE_AMOUNT} can't be parsed to f64"))
+    } else {
+        Err(format!("Failed to get {FACTURE_AMOUNT}"))
+    }
+}
+
+fn resolve_amount_queries(queries: &HashMap<String, String>) -> Result<f64, String> {
+    let amount_str = queries.get(FACTURE_AMOUNT);
+    if let Some(amount_str) = amount_str {
+        let maybe_f = amount_str.parse::<f64>();
+        maybe_f
+            .ok()
+            .ok_or(format!("{FACTURE_AMOUNT} can't be parsed to f64"))
+    } else {
+        Err(format!("Failed to get {FACTURE_AMOUNT}"))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use wasm_bindgen_test::*;
+
+    #[wasm_bindgen_test]
+    fn resolve_facture_dto_from_form_should_return_dto() {
+        let form = empty_form();
+        form.append_with_str(FACTURE_NUMBER_QUERY, "123")
+            .expect("Could not add number in form");
+        form.append_with_str(FACTURE_DATE_QUERY, "22/02/2022")
+            .expect("Could not add date in form");
+        form.append_with_str(FACTURE_DATE_EMITED_QUERY, "23/02/2022")
+            .expect("Could not add emited date in form");
+        form.append_with_str(FACTURE_AMOUNT, "40.0")
+            .expect("Could not add amount in form");
+        form.append_with_str(FACTURE_ACOMPTE, "comptant")
+            .expect("Could not add acompte in form");
+        form.append_with_str(FACTURE_IS_PAID, "on")
+            .expect("Could not add is paid in form");
+        form.append_with_str(FACTURE_PROJECT_NAME, "a project")
+            .expect("Could not add project name in form");
+        form.append_with_str(FACTURE_PROJECT_ADRESS, "a project adress")
+            .expect("Could not add project adress in form");
+        form.append_with_str(FACTURE_PROJECT_EMAIL, "project@gmail.com")
+            .expect("Could not add project mail in form");
+        form.append_with_str(FACTURE_PROJECT_TEL, "0487452734")
+            .expect("Could not add project tel in form");
+        form.append_with_str(FACTURE_PROJECT_WEBSITE, "project.com")
+            .expect("Could not add project website in form");
+        form.append_with_str(FACTURE_CLIENT_NAME, "a client")
+            .expect("Could not add client name in form");
+        form.append_with_str(FACTURE_CLIENT_ADRESS, "a client adress")
+            .expect("Could not add client adress in form");
+        form.append_with_str(FACTURE_CLIENT_TEL, "0487452734")
+            .expect("Could not add client tel in form");
+        form.append_with_str(FACTURE_CLIENT_TVA_INTRACOMMUNAUTAIRE, "00000000")
+            .expect("Could not add client tva in form");
+        form.append_with_str(FACTURE_CLIENT_DEVIS, "DEV01")
+            .expect("Could not add client devis in form");
+        let expected_dto = FactureDto {
+            number: 123,
+            date: NaiveDate::from_ymd_opt(2022, 02, 22).unwrap(),
+            date_emited: NaiveDate::from_ymd_opt(2022, 02, 23).unwrap(),
+            amount: 40.0,
+            acompte: "comptant".to_string(),
+            is_paid: true,
+            project_name: "a project".to_string(),
+            project_adress: "a project adress".to_string(),
+            project_mail: "project@gmail.com".to_string(),
+            project_tel: "0487452734".to_string(),
+            project_website: "project.com".to_string(),
+            client_name: "a client".to_string(),
+            client_adress: "a client adress".to_string(),
+            client_tel: "0487452734".to_string(),
+            client_tva: "00000000".to_string(),
+            client_devis: "DEV01".to_string(),
+        };
+        assert_eq!(FactureDto::from_form_data(&form), Ok(expected_dto));
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_facture_dto_from_form_should_return_error() {
+        let form = empty_form();
+        form.append_with_str(FACTURE_NUMBER_QUERY, "abc")
+            .expect("Could not add number in form");
+        form.append_with_str(FACTURE_DATE_QUERY, "22/02/2022")
+            .expect("Could not add date in form");
+        form.append_with_str(FACTURE_DATE_EMITED_QUERY, "23/02/2022")
+            .expect("Could not add emited date in form");
+        form.append_with_str(FACTURE_AMOUNT, "40.0")
+            .expect("Could not add amount in form");
+        form.append_with_str(FACTURE_ACOMPTE, "comptant")
+            .expect("Could not add acompte in form");
+        form.append_with_str(FACTURE_IS_PAID, "on")
+            .expect("Could not add is paid in form");
+        form.append_with_str(FACTURE_PROJECT_NAME, "a project")
+            .expect("Could not add project name in form");
+        form.append_with_str(FACTURE_PROJECT_ADRESS, "a project adress")
+            .expect("Could not add project adress in form");
+        form.append_with_str(FACTURE_PROJECT_EMAIL, "project@gmail.com")
+            .expect("Could not add project mail in form");
+        form.append_with_str(FACTURE_PROJECT_TEL, "0487452734")
+            .expect("Could not add project tel in form");
+        form.append_with_str(FACTURE_PROJECT_WEBSITE, "project.com")
+            .expect("Could not add project website in form");
+        form.append_with_str(FACTURE_CLIENT_NAME, "a client")
+            .expect("Could not add client name in form");
+        form.append_with_str(FACTURE_CLIENT_ADRESS, "a client adress")
+            .expect("Could not add client adress in form");
+        form.append_with_str(FACTURE_CLIENT_TEL, "0487452734")
+            .expect("Could not add client tel in form");
+        form.append_with_str(FACTURE_CLIENT_TVA_INTRACOMMUNAUTAIRE, "00000000")
+            .expect("Could not add client tva in form");
+        form.append_with_str(FACTURE_CLIENT_DEVIS, "DEV01")
+            .expect("Could not add client devis in form");
+        assert_eq!(
+            FactureDto::from_form_data(&form),
+            Err("Failed to parse abc into usize".to_string())
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_number_form_should_return_number() {
+        let form = empty_form();
+        form.append_with_str(FACTURE_NUMBER_QUERY, "123")
+            .expect("Could not add number in form data");
+        assert_eq!(resolve_number_form(&form), Ok(123));
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_number_form_should_return_get_error_when_using_wrong_key() {
+        let form = empty_form();
+        form.append_with_str("wrong_key", "123")
+            .expect("Could not add number in form data");
+        assert_eq!(
+            resolve_number_form(&form),
+            Err("Failed to get factureNumber".to_string())
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_number_form_should_return_parse_error_when_parsing_string() {
+        let form = empty_form();
+        form.append_with_str(FACTURE_NUMBER_QUERY, "abc")
+            .expect("Could not add number in form data");
+        assert_eq!(
+            resolve_number_form(&form),
+            Err("Failed to parse abc into usize".to_string())
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_number_form_should_return_parse_error_when_parsing_float() {
+        let form = empty_form();
+        form.append_with_str(FACTURE_NUMBER_QUERY, "12.43")
+            .expect("Could not add number in form data");
+        assert_eq!(
+            resolve_number_form(&form),
+            Err("Failed to parse 12.43 into usize".to_string())
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_number_queries_should_return_number() {
+        let mut queries = empty_queries();
+        queries.insert(FACTURE_NUMBER_QUERY.to_string(), "123".to_string());
+        assert_eq!(resolve_number_queries(&queries), Ok(123));
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_number_queries_should_return_get_error_when_using_wrong_key() {
+        let mut queries = empty_queries();
+        queries.insert("wrong_key".to_string(), "123".to_string());
+        assert_eq!(
+            resolve_number_queries(&queries),
+            Err("Failed to get factureNumber".to_string())
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_number_queries_should_return_parse_error_when_parsing_string() {
+        let mut queries = empty_queries();
+        queries.insert(FACTURE_NUMBER_QUERY.to_string(), "abc".to_string());
+        assert_eq!(
+            resolve_number_queries(&queries),
+            Err("Failed to parse abc into usize".to_string())
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_number_queries_should_return_parse_error_when_parsing_float() {
+        let mut queries = empty_queries();
+        queries.insert(FACTURE_NUMBER_QUERY.to_string(), "12.54".to_string());
+        assert_eq!(
+            resolve_number_queries(&queries),
+            Err("Failed to parse 12.54 into usize".to_string())
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_date_form_should_return_naive_date() {
+        let form = empty_form();
+        form.append_with_str(FACTURE_DATE_QUERY, "22/01/2022")
+            .expect("Failed to add date in form data");
+        assert_eq!(
+            resolve_date_form(&form, FACTURE_DATE_QUERY),
+            Ok(NaiveDate::from_ymd_opt(2022, 01, 22).unwrap())
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_date_form_should_return_get_error() {
+        let form = empty_form();
+        form.append_with_str(FACTURE_DATE_QUERY, "22/01/2022")
+            .expect("Failed to add date in form data");
+        assert_eq!(
+            resolve_date_form(&form, "wrong_key"),
+            Err("Failed to get wrong_key".to_string())
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_date_form_should_return_parse_error_when_wrong_date_format() {
+        let form = empty_form();
+        form.append_with_str(FACTURE_DATE_QUERY, "22/012/2022")
+            .expect("Failed to add date in form data");
+        assert_eq!(
+            resolve_date_form(&form, FACTURE_DATE_QUERY),
+            Err("Could not parse date from string 22/012/2022".to_string())
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_date_queries_should_return_naive_date() {
+        let mut queries = empty_queries();
+        queries.insert(FACTURE_DATE_QUERY.to_string(), "22/01/2022".to_string());
+        assert_eq!(
+            resolve_date_queries(&queries, FACTURE_DATE_QUERY),
+            Ok(NaiveDate::from_ymd_opt(2022, 01, 22).unwrap())
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_date_queries_should_return_get_error() {
+        let mut queries = empty_queries();
+        queries.insert(FACTURE_DATE_QUERY.to_string(), "22/01/2022".to_string());
+        assert_eq!(
+            resolve_date_queries(&queries, "wrong_key"),
+            Err("Failed to get wrong_key".to_string())
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_date_queries_should_return_parse_error_when_wrong_date_format() {
+        let mut queries = empty_queries();
+        queries.insert(FACTURE_DATE_QUERY.to_string(), "22/012/2022".to_string());
+        assert_eq!(
+            resolve_date_queries(&queries, FACTURE_DATE_QUERY),
+            Err("Could not parse date from string 22/012/2022".to_string())
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_acompte_form_should_return_acompte() {
+        let form = empty_form();
+        form.append_with_str(FACTURE_ACOMPTE, "comptant")
+            .expect("Failed to add acompte in acompte");
+        assert_eq!(resolve_acompte_form(&form), Ok("comptant".to_string()));
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_acompte_form_should_return_get_error() {
+        let form = empty_form();
+        form.append_with_str("wrong_key", "comptant")
+            .expect("Failed to add acompte in acompte");
+        assert_eq!(
+            resolve_acompte_form(&form),
+            Err("Failed to get factureAcompte".to_string())
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_acompte_form_should_return_error_when_string_is_not_comptant_or_avec_acompte() {
+        let form = empty_form();
+        form.append_with_str(FACTURE_ACOMPTE, "a string")
+            .expect("Failed to add acompte in acompte");
+        assert_eq!(
+            resolve_acompte_form(&form),
+            Err("Value must be either `acompte` or `avec acompte`".to_string())
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_acompte_queries_should_return_acompte() {
+        let mut queries = empty_queries();
+        queries.insert(FACTURE_ACOMPTE.to_string(), "avec acompte".to_string());
+        assert_eq!(
+            resolve_acompte_queries(&queries),
+            Ok("avec acompte".to_string())
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_acompte_queries_should_return_get_error() {
+        let mut queries = empty_queries();
+        queries.insert("wrong_key".to_string(), "comptant".to_string());
+        assert_eq!(
+            resolve_acompte_queries(&queries),
+            Err("Failed to get factureAcompte".to_string())
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_acompte_queries_should_return_error_when_string_is_not_comptant_or_avec_acompte() {
+        let mut queries = empty_queries();
+        queries.insert(FACTURE_ACOMPTE.to_string(), "a string".to_string());
+        assert_eq!(
+            resolve_acompte_queries(&queries),
+            Err("Value must be either `acompte` or `avec acompte`".to_string())
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_is_paid_form_should_return_true() {
+        let form = empty_form();
+        form.append_with_str(FACTURE_IS_PAID, "on")
+            .expect("Failed to add is paid in form");
+        assert_eq!(resolve_is_paid_form(&form), Ok(true));
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_is_paid_form_should_return_false() {
+        let form = empty_form();
+        assert_eq!(resolve_is_paid_form(&form), Ok(false));
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_is_paid_queries_should_return_true() {
+        let mut queries = empty_queries();
+        queries.insert(FACTURE_IS_PAID.to_string(), "true".to_string());
+        assert_eq!(resolve_is_paid_queries(&queries), Ok(true));
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_is_paid_queries_should_return_false() {
+        let queries = empty_queries();
+        assert_eq!(resolve_is_paid_queries(&queries), Ok(false));
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_project_name_form_should_return_name() {
+        let form = empty_form();
+        form.append_with_str(FACTURE_PROJECT_NAME, "A project")
+            .expect("Failed to add project name in form");
+        assert_eq!(
+            resolve_project_name_form(&form),
+            Ok("A project".to_string())
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_project_name_form_should_return_get_error() {
+        let form = empty_form();
+        form.append_with_str("wrong_key", "A project")
+            .expect("Failed to add project name in form");
+        assert_eq!(
+            resolve_project_name_form(&form),
+            Err("Failed to get factureProjectName".to_string())
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_project_name_form_should_return_empty_error() {
+        let form = empty_form();
+        form.append_with_str(FACTURE_PROJECT_NAME, "")
+            .expect("Failed to add project name in form");
+        assert_eq!(
+            resolve_project_name_form(&form),
+            Err("factureProjectName value can't be null".to_string())
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_project_name_queries_should_return_name() {
+        let mut queries = empty_queries();
+        queries.insert(FACTURE_PROJECT_NAME.to_string(), "A project".to_string());
+        assert_eq!(
+            resolve_project_name_queries(&queries),
+            Ok("A project".to_string())
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_project_name_queries_should_return_get_error() {
+        let mut queries = empty_queries();
+        queries.insert("wrong_key".to_string(), "A project".to_string());
+        assert_eq!(
+            resolve_project_name_queries(&queries),
+            Err("Failed to get factureProjectName".to_string())
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_project_name_queries_should_return_empty_error() {
+        let mut queries = empty_queries();
+        queries.insert(FACTURE_PROJECT_NAME.to_string(), "".to_string());
+        assert_eq!(
+            resolve_project_name_queries(&queries),
+            Err("factureProjectName value can't be null".to_string())
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_project_adress_form_should_return_adress() {
+        let form = empty_form();
+        form.append_with_str(FACTURE_PROJECT_ADRESS, "An adress")
+            .expect("Failed to add project adress in form");
+        assert_eq!(
+            resolve_project_adress_form(&form),
+            Ok("An adress".to_string())
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_project_adress_form_should_return_get_error() {
+        let form = empty_form();
+        form.append_with_str("wrong_key", "An adress")
+            .expect("Failed to add project adress in form");
+        assert_eq!(
+            resolve_project_adress_form(&form),
+            Err("Failed to get factureProjectAdress".to_string())
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_project_adress_form_should_return_empty_error() {
+        let form = empty_form();
+        form.append_with_str(FACTURE_PROJECT_ADRESS, "")
+            .expect("Failed to add project adress in form");
+        assert_eq!(
+            resolve_project_adress_form(&form),
+            Err("factureProjectAdress value can't be null".to_string())
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_project_adress_queries_should_return_adress() {
+        let mut queries = empty_queries();
+        queries.insert(FACTURE_PROJECT_ADRESS.to_string(), "An adress".to_string());
+        assert_eq!(
+            resolve_project_adress_queries(&queries),
+            Ok("An adress".to_string())
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_project_adress_queries_should_return_get_error() {
+        let mut queries = empty_queries();
+        queries.insert("wrong_key".to_string(), "An adress".to_string());
+        assert_eq!(
+            resolve_project_adress_queries(&queries),
+            Err("Failed to get factureProjectAdress".to_string())
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_project_adress_queries_should_return_empty_error() {
+        let mut queries = empty_queries();
+        queries.insert(FACTURE_PROJECT_ADRESS.to_string(), "".to_string());
+        assert_eq!(
+            resolve_project_adress_queries(&queries),
+            Err("factureProjectAdress value can't be null".to_string())
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_project_mail_form_should_return_mail() {
+        let form = empty_form();
+        form.append_with_str(FACTURE_PROJECT_EMAIL, "project@gmail.com")
+            .expect("Failed to add project mail in form");
+        assert_eq!(
+            resolve_project_mail_form(&form),
+            Ok("project@gmail.com".to_string())
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_project_mail_form_should_return_get_error() {
+        let form = empty_form();
+        form.append_with_str("wrong_key", "project@gmail.com")
+            .expect("Failed to add project mail in form");
+        assert_eq!(
+            resolve_project_mail_form(&form),
+            Err("Failed to get factureProjectEmail".to_string())
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_project_mail_form_should_return_regex_error() {
+        let form = empty_form();
+        form.append_with_str(FACTURE_PROJECT_EMAIL, "project@gmail.a")
+            .expect("Failed to add project mail in form");
+        assert_eq!(
+            resolve_project_mail_form(&form),
+            Err("factureProjectEmail value must have format like `project@gmail.com`".to_string())
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_project_mail_queries_should_return_mail() {
+        let mut queries = empty_queries();
+        queries.insert(
+            FACTURE_PROJECT_EMAIL.to_string(),
+            "project@gmail.com".to_string(),
+        );
+        assert_eq!(
+            resolve_project_mail_queries(&queries),
+            Ok("project@gmail.com".to_string())
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_project_mail_queries_should_return_get_error() {
+        let mut queries = empty_queries();
+        queries.insert("wrong_key".to_string(), "project@gmail.com".to_string());
+        assert_eq!(
+            resolve_project_mail_queries(&queries),
+            Err("Failed to get factureProjectEmail".to_string())
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_project_mail_queries_should_return_regex_error() {
+        let mut queries = empty_queries();
+        queries.insert(
+            FACTURE_PROJECT_EMAIL.to_string(),
+            "project@gmail.a".to_string(),
+        );
+        assert_eq!(
+            resolve_project_mail_queries(&queries),
+            Err("factureProjectEmail value must have format like `project@gmail.com`".to_string())
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_project_tel_form_should_return_tel() {
+        let form = empty_form();
+        form.append_with_str(FACTURE_PROJECT_TEL, "0467873289")
+            .expect("Failed to add project tel in form");
+        assert_eq!(
+            resolve_project_tel_form(&form),
+            Ok("0467873289".to_string())
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_project_tel_form_should_return_get_error() {
+        let form = empty_form();
+        form.append_with_str("wrong_key", "0467873289")
+            .expect("Failed to add project tel in form");
+        assert_eq!(
+            resolve_project_tel_form(&form),
+            Err("Failed to get factureProjectTel".to_string())
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_project_tel_form_should_return_empty_error() {
+        let form = empty_form();
+        form.append_with_str(FACTURE_PROJECT_TEL, "")
+            .expect("Failed to add project tel in form");
+        assert_eq!(
+            resolve_project_tel_form(&form),
+            Err("factureProjectTel value can't be null".to_string())
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_project_tel_queries_should_return_tel() {
+        let mut queries = empty_queries();
+        queries.insert(FACTURE_PROJECT_TEL.to_string(), "0467873289".to_string());
+        assert_eq!(
+            resolve_project_tel_queries(&queries),
+            Ok("0467873289".to_string())
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_project_tel_queries_should_return_get_error() {
+        let mut queries = empty_queries();
+        queries.insert("wrong_key".to_string(), "0467873289".to_string());
+        assert_eq!(
+            resolve_project_tel_queries(&queries),
+            Err("Failed to get factureProjectTel".to_string())
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_project_tel_queries_should_return_empty_error() {
+        let mut queries = empty_queries();
+        queries.insert(FACTURE_PROJECT_TEL.to_string(), "".to_string());
+        assert_eq!(
+            resolve_project_tel_queries(&queries),
+            Err("factureProjectTel value can't be null".to_string())
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_project_website_form_should_return_website() {
+        let form = empty_form();
+        form.append_with_str(FACTURE_PROJECT_WEBSITE, "project.com")
+            .expect("Failed to add project website in form");
+        assert_eq!(
+            resolve_project_website_form(&form),
+            Ok("project.com".to_string())
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_project_website_form_should_return_get_error() {
+        let form = empty_form();
+        form.append_with_str("wrong_key", "project.com")
+            .expect("Failed to add project website in form");
+        assert_eq!(
+            resolve_project_website_form(&form),
+            Err("Failed to get factureProjectWebsite".to_string())
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_project_website_queries_should_return_website() {
+        let mut queries = empty_queries();
+        queries.insert(
+            FACTURE_PROJECT_WEBSITE.to_string(),
+            "project.com".to_string(),
+        );
+        assert_eq!(
+            resolve_project_website_queries(&queries),
+            Ok("project.com".to_string())
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_project_website_queries_should_return_get_error() {
+        let mut queries = empty_queries();
+        queries.insert("wrong_key".to_string(), "project.com".to_string());
+        assert_eq!(
+            resolve_project_website_queries(&queries),
+            Err("Failed to get factureProjectWebsite".to_string())
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_client_name_form_should_return_name() {
+        let form = empty_form();
+        form.append_with_str(FACTURE_CLIENT_NAME, "A client")
+            .expect("Failed to add client name in form");
+        assert_eq!(resolve_client_name_form(&form), Ok("A client".to_string()));
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_client_name_form_should_return_get_error() {
+        let form = empty_form();
+        form.append_with_str("wrong_key", "A client")
+            .expect("Failed to add client name in form");
+        assert_eq!(
+            resolve_client_name_form(&form),
+            Err("Failed to get factureClientName".to_string())
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_client_name_form_should_return_empty_error() {
+        let form = empty_form();
+        form.append_with_str(FACTURE_CLIENT_NAME, "")
+            .expect("Failed to add client name in form");
+        assert_eq!(
+            resolve_client_name_form(&form),
+            Err("factureClientName value can't be null".to_string())
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_client_name_queries_should_return_name() {
+        let mut queries = empty_queries();
+        queries.insert(FACTURE_CLIENT_NAME.to_string(), "A client".to_string());
+        assert_eq!(
+            resolve_client_name_queries(&queries),
+            Ok("A client".to_string())
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_client_name_queries_should_return_get_error() {
+        let mut queries = empty_queries();
+        queries.insert("wrong_key".to_string(), "A client".to_string());
+        assert_eq!(
+            resolve_client_name_queries(&queries),
+            Err("Failed to get factureClientName".to_string())
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_client_name_queries_should_return_empty_error() {
+        let mut queries = empty_queries();
+        queries.insert(FACTURE_CLIENT_NAME.to_string(), "".to_string());
+        assert_eq!(
+            resolve_client_name_queries(&queries),
+            Err("factureClientName value can't be null".to_string())
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_client_adress_form_should_return_adress() {
+        let form = empty_form();
+        form.append_with_str(FACTURE_CLIENT_ADRESS, "An adress")
+            .expect("Failed to add client adress in form");
+        assert_eq!(
+            resolve_client_adress_form(&form),
+            Ok("An adress".to_string())
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_client_adress_form_should_return_get_error() {
+        let form = empty_form();
+        form.append_with_str("wrong_key", "An adress")
+            .expect("Failed to add client adress in form");
+        assert_eq!(
+            resolve_client_adress_form(&form),
+            Err("Failed to get factureClientAdress".to_string())
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_client_adress_form_should_return_get_empty_error() {
+        let form = empty_form();
+        form.append_with_str(FACTURE_CLIENT_ADRESS, "")
+            .expect("Failed to add client adress in form");
+        assert_eq!(
+            resolve_client_adress_form(&form),
+            Err("factureClientAdress value can't be null".to_string())
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_client_adress_queries_should_return_adress() {
+        let mut queries = empty_queries();
+        queries.insert(FACTURE_CLIENT_ADRESS.to_string(), "An adress".to_string());
+        assert_eq!(
+            resolve_client_adress_queries(&queries),
+            Ok("An adress".to_string())
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_client_adress_queries_should_return_get_error() {
+        let mut queries = empty_queries();
+        queries.insert("wrong_key".to_string(), "An adress".to_string());
+        assert_eq!(
+            resolve_client_adress_queries(&queries),
+            Err("Failed to get factureClientAdress".to_string())
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_client_adress_queries_should_return_get_empty_error() {
+        let mut queries = empty_queries();
+        queries.insert(FACTURE_CLIENT_ADRESS.to_string(), "".to_string());
+        assert_eq!(
+            resolve_client_adress_queries(&queries),
+            Err("factureClientAdress value can't be null".to_string())
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_client_tel_form_should_return_tel() {
+        let form = empty_form();
+        form.append_with_str(FACTURE_CLIENT_TEL, "0467874532")
+            .expect("Failed to add client tel in form");
+        assert_eq!(resolve_client_tel_form(&form), Ok("0467874532".to_string()));
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_client_tel_form_should_return_get_error() {
+        let form = empty_form();
+        form.append_with_str("wrong_key", "0467874532")
+            .expect("Failed to add client tel in form");
+        assert_eq!(
+            resolve_client_tel_form(&form),
+            Err("Failed to get factureClientTel".to_string())
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_client_tel_form_should_return_empty_error() {
+        let form = empty_form();
+        form.append_with_str(FACTURE_CLIENT_TEL, "")
+            .expect("Failed to add client tel in form");
+        assert_eq!(
+            resolve_client_tel_form(&form),
+            Err("factureClientTel value can't be null".to_string())
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_client_tel_queries_should_return_tel() {
+        let mut queries = empty_queries();
+        queries.insert(FACTURE_CLIENT_TEL.to_string(), "0467874532".to_string());
+        assert_eq!(
+            resolve_client_tel_queries(&queries),
+            Ok("0467874532".to_string())
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_client_tel_queries_should_return_get_error() {
+        let mut queries = empty_queries();
+        queries.insert("wrong_key".to_string(), "0467874532".to_string());
+        assert_eq!(
+            resolve_client_tel_queries(&queries),
+            Err("Failed to get factureClientTel".to_string())
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_client_tel_queries_should_return_empty_error() {
+        let mut queries = empty_queries();
+        queries.insert(FACTURE_CLIENT_TEL.to_string(), "".to_string());
+        assert_eq!(
+            resolve_client_tel_queries(&queries),
+            Err("factureClientTel value can't be null".to_string())
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_client_tva_form_should_return_tva() {
+        let form = empty_form();
+        form.append_with_str(FACTURE_CLIENT_TVA_INTRACOMMUNAUTAIRE, "00000000")
+            .expect("Failed to add client tva in form");
+        assert_eq!(resolve_client_tva_form(&form), Ok("00000000".to_string()));
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_client_tva_form_should_return_get_error() {
+        let form = empty_form();
+        form.append_with_str("wrong_key", "00000000")
+            .expect("Failed to add client tva in form");
+        assert_eq!(
+            resolve_client_tva_form(&form),
+            Err("Failed to get factureClientTvaIntracommunautaire".to_string())
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_client_tva_form_should_return_empty_error() {
+        let form = empty_form();
+        form.append_with_str(FACTURE_CLIENT_TVA_INTRACOMMUNAUTAIRE, "")
+            .expect("Failed to add client tva in form");
+        assert_eq!(
+            resolve_client_tva_form(&form),
+            Err("factureClientTvaIntracommunautaire value can't be null".to_string())
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_client_tva_queries_should_return_tva() {
+        let mut queries = empty_queries();
+        queries.insert(
+            FACTURE_CLIENT_TVA_INTRACOMMUNAUTAIRE.to_string(),
+            "00000000".to_string(),
+        );
+        assert_eq!(
+            resolve_client_tva_queries(&queries),
+            Ok("00000000".to_string())
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_client_tva_queries_should_return_get_error() {
+        let mut queries = empty_queries();
+        queries.insert("wrong_key".to_string(), "00000000".to_string());
+        assert_eq!(
+            resolve_client_tva_queries(&queries),
+            Err("Failed to get factureClientTvaIntracommunautaire".to_string())
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_client_tva_queries_should_return_empty_error() {
+        let mut queries = empty_queries();
+        queries.insert(
+            FACTURE_CLIENT_TVA_INTRACOMMUNAUTAIRE.to_string(),
+            "".to_string(),
+        );
+        assert_eq!(
+            resolve_client_tva_queries(&queries),
+            Err("factureClientTvaIntracommunautaire value can't be null".to_string())
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_client_devis_form_should_return_devis() {
+        let form = empty_form();
+        form.append_with_str(FACTURE_CLIENT_DEVIS, "DEV01")
+            .expect("Failed to add client tva in form");
+        assert_eq!(resolve_client_devis_form(&form), Ok("DEV01".to_string()));
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_client_devis_form_should_return_get_error() {
+        let form = empty_form();
+        form.append_with_str("wrong_key", "DEV01")
+            .expect("Failed to add client tva in form");
+        assert_eq!(
+            resolve_client_devis_form(&form),
+            Err("Failed to get factureClientDevis".to_string())
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_client_devis_form_should_return_empty_error() {
+        let form = empty_form();
+        form.append_with_str(FACTURE_CLIENT_DEVIS, "")
+            .expect("Failed to add client tva in form");
+        assert_eq!(
+            resolve_client_devis_form(&form),
+            Err("factureClientDevis value can't be null".to_string())
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_client_devis_queries_should_return_devis() {
+        let mut queries = empty_queries();
+        queries.insert(FACTURE_CLIENT_DEVIS.to_string(), "DEV01".to_string());
+        assert_eq!(
+            resolve_client_devis_queries(&queries),
+            Ok("DEV01".to_string())
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_client_devis_queries_should_return_get_error() {
+        let mut queries = empty_queries();
+        queries.insert("wrong_key".to_string(), "DEV01".to_string());
+        assert_eq!(
+            resolve_client_devis_queries(&queries),
+            Err("Failed to get factureClientDevis".to_string())
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_client_devis_queries_should_return_empty_error() {
+        let mut queries = empty_queries();
+        queries.insert(FACTURE_CLIENT_DEVIS.to_string(), "".to_string());
+        assert_eq!(
+            resolve_client_devis_queries(&queries),
+            Err("factureClientDevis value can't be null".to_string())
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_amount_form_should_return_amount() {
+        let form = empty_form();
+        form.append_with_str(FACTURE_AMOUNT, "12.43")
+            .expect("Failed to add amount in form");
+        assert_eq!(resolve_amount_form(&form), Ok(12.43));
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_amount_form_should_return_get_error() {
+        let form = empty_form();
+        form.append_with_str("wrong_key", "12.43")
+            .expect("Failed to add amount in form");
+        assert_eq!(
+            resolve_amount_form(&form),
+            Err("Failed to get factureAmount".to_string())
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_amount_form_should_return_parse_error() {
+        let form = empty_form();
+        form.append_with_str(FACTURE_AMOUNT, "abc")
+            .expect("Failed to add amount in form");
+        assert_eq!(
+            resolve_amount_form(&form),
+            Err("factureAmount can't be parsed to f64".to_string())
+        );
+    }
+
+    fn empty_form() -> FormData {
+        FormData::new().unwrap()
+    }
+
+    fn empty_queries() -> HashMap<String, String> {
+        HashMap::<String, String>::new()
+    }
 }

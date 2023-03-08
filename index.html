@@ -76,11 +76,36 @@
             .notUnderlinedLink:hover{
                 animation: link_opacity 1s forwards;
             }
-            label{
-                margin-right: 50px;
-            }
         </style>
         <style id="receiptStyle">
+            #factureForm{
+                display: grid;
+                grid-template-columns: auto auto auto auto;
+                margin-top: 100px;
+            }
+            input, select, textarea {
+                width: 300px;
+                font-family: nexa_lightregular, Roboto;
+                font-size: 20px;
+                background: transparent;
+                color: #eeeeee;
+                padding: 10px;
+                border: solid 2px #eeeeee;
+                border-radius: 5px;
+                transition: all .5s ease;
+            }
+            input:hover, textarea:hover {
+                background: #4e4e4e;
+            }
+            input:focus, textarea:focus {
+                background: #4e4e4e;
+            }
+            .checkbox {
+                cursor: pointer;
+            }
+            #factureError{
+                color: red;
+            }
             #receiptGenerator div{
                 margin-top: 20px;
             }
@@ -146,6 +171,28 @@
             .factureTitle{
                 color: black;
                 text-transform: uppercase;
+            }
+            .button{
+                background: transparent;
+                color: #ff8400;
+                border: 3px solid #ff8400;
+                transition: all .5s ease;
+                transform: translate(0, 0);
+                font-family: nexa_lightregular, Roboto;
+                font-size: 20px;
+                font-weight: bolder;
+                letter-spacing: 2px;
+                border-radius: 5px;
+                padding: 15px;
+            }
+            .button:hover {
+                background: #ff8400;
+                color: black;
+                transition: all .35s ease;
+                cursor: pointer;
+            }
+            .button:active {
+                transform: translate(5px, 5px);
             }
             #receiptFooter{
                 width: 21cm;
