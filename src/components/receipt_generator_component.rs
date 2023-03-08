@@ -64,6 +64,14 @@ pub fn receipt_generator_component() -> Html {
                 <div><input id={FACTURE_CLIENT_DEVIS} name={FACTURE_CLIENT_DEVIS} /></div>
                 <div><label for={FACTURE_AMOUNT}>{"Coût de la prestation"}</label></div>
                 <div><input id={FACTURE_AMOUNT} name={FACTURE_AMOUNT} value={"40.0"} /></div>
+                <div><label for={FACTURE_PROJECT_BANK}>{"Banque du project"}</label></div>
+                <div><input id={FACTURE_PROJECT_BANK} name={FACTURE_PROJECT_BANK} /></div>
+                <div><label for={FACTURE_PROJECT_IBAN}>{"Iban du project"}</label></div>
+                <div><input id={FACTURE_PROJECT_IBAN} name={FACTURE_PROJECT_IBAN} /></div>
+                <div><label for={FACTURE_PROJECT_BIC}>{"Bic du projet"}</label></div>
+                <div><input id={FACTURE_PROJECT_BIC} name={FACTURE_PROJECT_BIC} /></div>
+                <div></div>
+                <div></div>
                 <div><input type="submit" id="factureGenerateButton" class="button" value="Générer"/></div>
                 <div id="factureError">{facture_error.to_string()}</div>
             </form>

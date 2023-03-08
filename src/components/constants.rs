@@ -14,5 +14,8 @@ pub const FACTURE_CLIENT_ADRESS: &str = "factureClientAdress";
 pub const FACTURE_CLIENT_TEL: &str = "factureClientTel";
 pub const FACTURE_CLIENT_TVA_INTRACOMMUNAUTAIRE: &str = "factureClientTvaIntracommunautaire";
 pub const FACTURE_CLIENT_DEVIS: &str = "factureClientDevis";
+pub const FACTURE_PROJECT_BANK: &str = "factureProjectBank";
+pub const FACTURE_PROJECT_IBAN: &str = "factureProjectIban";
+pub const FACTURE_PROJECT_BIC: &str = "factureProjectBic";
 
 pub const DATE_FORMAT: &str = "%d/%m/%Y";
