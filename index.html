@@ -194,35 +194,42 @@
             .button:active {
                 transform: translate(5px, 5px);
             }
+            #receiptAboveFooter{
+                font-family: Roboto, 'Courier New', Courier, monospace;
+                font-size: 12px;
+                letter-spacing: normal;
+                color: #666666;
+                text-align: left;
+                margin-top: 200px;
+            }
             #receiptFooter{
                 width: 21cm;
                 text-align: center;
                 border-top: solid 1px #dddddd;
+                font-family: Roboto, 'Courier New', Courier, monospace;
                 font-size: 12px;
                 letter-spacing: normal;
                 color: #666666;
                 padding-top: 20px;
             }
-            @media screen {
+            @media print{
                 #receiptFooter{
                     position: fixed;
-                    bottom: 20px;
+                    bottom: 0;
                 }
-            }
-            @media print {
-                #receiptFooter{
-                    position: fixed;
-                    bottom: 20px;
+
+                .emptyHeader, .emptyFooter {
+                    height: 100px;
                 }
             }
         </style>
         <style id="footerStyle">
-            footer{
+            .linksFooter{
                 position: fixed;
                 top: 50px;
                 right: 40px;
             }
-            footer div{
+            .linksFooter div{
                 display: flex;
                 align-items: center;
                 justify-content: center;

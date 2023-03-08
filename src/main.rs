@@ -43,7 +43,7 @@ fn facture() -> Html {
 
 fn footer() -> Html {
     html! {
-        <footer><div>
+        <footer class="linksFooter"><div>
             <SocialMediaBlockComponent social_media_block = { youtube_link() } />
             <SocialMediaBlockComponent social_media_block = { github_link() } />
             <SocialMediaBlockComponent social_media_block = { twitter_link() } />
