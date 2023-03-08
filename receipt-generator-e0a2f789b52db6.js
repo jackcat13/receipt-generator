@@ -869,7 +869,7 @@ function initSync(module) {
 
 async function init(input) {
     if (typeof input === 'undefined') {
-        input = new URL('receipt-generator-2e86d924c0d21fd5_bg.wasm', import.meta.url);
+        input = new URL('receipt-generator-e0a2f789b52db6_bg.wasm', import.meta.url);
     }
     const imports = getImports();
 
