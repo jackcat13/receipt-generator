@@ -23,7 +23,7 @@ pub struct FactureDto {
     pub client_tel: String,
     pub client_tva: String,
     pub client_devis: String,
-    pub amount: f64,
+    pub services: HashMap<String, f64>,
     pub project_bank: String,
     pub project_iban: String,
     pub project_bic: String,
@@ -62,8 +62,8 @@ impl FactureDto {
         client_tva.clone()?;
         let client_devis = resolve_client_devis_form(&form_data);
         client_devis.clone()?;
-        let amount = resolve_amount_form(&form_data);
-        amount.clone()?;
+        let services = resolve_services_form(&form_data);
+        services.clone()?;
         let project_bank = resolve_project_bank_form(&form_data);
         project_bank.clone()?;
         let project_iban = resolve_project_iban_form(&form_data);
@@ -86,7 +86,7 @@ impl FactureDto {
             client_tel: client_tel.unwrap(),
             client_tva: client_tva.unwrap(),
             client_devis: client_devis.unwrap(),
-            amount: amount.unwrap(),
+            services: services.unwrap(),
             project_bank: project_bank.unwrap(),
             project_iban: project_iban.unwrap(),
             project_bic: project_bic.unwrap(),
@@ -126,8 +126,8 @@ impl FactureDto {
         client_tva.clone()?;
         let client_devis = resolve_client_devis_queries(&queries);
         client_devis.clone()?;
-        let amount = resolve_amount_queries(&queries);
-        amount.clone()?;
+        let services = resolve_services_queries(&queries);
+        services.clone()?;
         let project_bank = resolve_project_bank_queries(&queries);
         project_bank.clone()?;
         let project_iban = resolve_project_iban_queries(&queries);
@@ -150,7 +150,7 @@ impl FactureDto {
             client_tel: client_tel.unwrap(),
             client_tva: client_tva.unwrap(),
             client_devis: client_devis.unwrap(),
-            amount: amount.unwrap(),
+            services: services.unwrap(),
             project_bank: project_bank.unwrap(),
             project_iban: project_iban.unwrap(),
             project_bic: project_bic.unwrap(),
@@ -185,7 +185,10 @@ impl FactureDto {
             facture.client_tva,
         );
         queries.insert(FACTURE_CLIENT_DEVIS.to_string(), facture.client_devis);
-        queries.insert(FACTURE_AMOUNT.to_string(), facture.amount.to_string());
+        queries.insert(
+            FACTURE_SERVICES.to_string(),
+            serde_json::to_string(&facture.services).unwrap(),
+        );
         queries.insert(FACTURE_PROJECT_BANK.to_string(), facture.project_bank);
         queries.insert(FACTURE_PROJECT_IBAN.to_string(), facture.project_iban);
         queries.insert(FACTURE_PROJECT_BIC.to_string(), facture.project_bic);
@@ -491,28 +494,35 @@ fn resolve_client_devis_queries(queries: &HashMap<String, String>) -> Result<Str
     }
 }
 
-fn resolve_amount_form(form_data: &FormData) -> Result<f64, String> {
-    let amount_str = form_data.get(FACTURE_AMOUNT).as_string();
-    if let Some(amount_str) = amount_str {
-        let maybe_f = amount_str.parse::<f64>();
-        maybe_f
-            .ok()
-            .ok_or(format!("{FACTURE_AMOUNT} can't be parsed to f64"))
+fn resolve_services_form(form_data: &FormData) -> Result<HashMap<String, f64>, String> {
+    let services_names = form_data.get_all(FACTURE_SERVICE);
+    let services_amounts = form_data.get_all(FACTURE_SERVICE_AMOUNT);
+    if services_names.length() == services_amounts.length() {
+        let mut services_map = HashMap::<String, f64>::new();
+        let names = services_names.iter();
+        let mut amounts = services_amounts.iter();
+        for name in names {
+            let amount = amounts
+                .next()
+                .unwrap()
+                .as_string()
+                .unwrap()
+                .parse::<f64>()
+                .unwrap();
+            services_map.insert(name.as_string().unwrap(), amount);
+        }
+        Ok(services_map)
     } else {
-        Err(format!("Failed to get {FACTURE_AMOUNT}"))
+        Err(format!(
+            "Failed to get {FACTURE_SERVICE} and {FACTURE_SERVICE_AMOUNT}"
+        ))
     }
 }
 
-fn resolve_amount_queries(queries: &HashMap<String, String>) -> Result<f64, String> {
-    let amount_str = queries.get(FACTURE_AMOUNT);
-    if let Some(amount_str) = amount_str {
-        let maybe_f = amount_str.parse::<f64>();
-        maybe_f
-            .ok()
-            .ok_or(format!("{FACTURE_AMOUNT} can't be parsed to f64"))
-    } else {
-        Err(format!("Failed to get {FACTURE_AMOUNT}"))
-    }
+fn resolve_services_queries(
+    queries: &HashMap<String, String>,
+) -> Result<HashMap<String, f64>, String> {
+    Ok(serde_json::from_str(queries.get(FACTURE_SERVICES).unwrap()).unwrap())
 }
 
 fn resolve_project_bank_form(form_data: &FormData) -> Result<String, String> {
@@ -560,6 +570,7 @@ fn resolve_project_bic_queries(queries: &HashMap<String, String>) -> Result<Stri
 #[cfg(test)]
 mod tests {
     use super::*;
+    use serde_json::json;
     use wasm_bindgen_test::*;
 
     #[wasm_bindgen_test]
@@ -570,7 +581,6 @@ mod tests {
             .unwrap();
         form.append_with_str(FACTURE_DATE_EMITED_QUERY, "23/02/2022")
             .unwrap();
-        form.append_with_str(FACTURE_AMOUNT, "40.0").unwrap();
         form.append_with_str(FACTURE_ACOMPTE, "comptant").unwrap();
         form.append_with_str(FACTURE_IS_PAID, "on").unwrap();
         form.append_with_str(FACTURE_PROJECT_NAME, "a project")
@@ -598,11 +608,16 @@ mod tests {
             .unwrap();
         form.append_with_str(FACTURE_PROJECT_BIC, "BNPAFRPPXXX")
             .unwrap();
+        form.append_with_str(FACTURE_SERVICE, "un service").unwrap();
+        form.append_with_str(FACTURE_SERVICE_AMOUNT, "40.12")
+            .unwrap();
+        let mut services_map = HashMap::<String, f64>::new();
+        services_map.insert("un service".to_string(), 40.12);
         let expected_dto = FactureDto {
             number: 123,
             date: NaiveDate::from_ymd_opt(2022, 02, 22).unwrap(),
             date_emited: NaiveDate::from_ymd_opt(2022, 02, 23).unwrap(),
-            amount: 40.0,
+            services: services_map,
             acompte: "comptant".to_string(),
             is_paid: true,
             project_name: "a project".to_string(),
@@ -630,7 +645,6 @@ mod tests {
             .unwrap();
         form.append_with_str(FACTURE_DATE_EMITED_QUERY, "23/02/2022")
             .unwrap();
-        form.append_with_str(FACTURE_AMOUNT, "40.0").unwrap();
         form.append_with_str(FACTURE_ACOMPTE, "comptant").unwrap();
         form.append_with_str(FACTURE_IS_PAID, "on").unwrap();
         form.append_with_str(FACTURE_PROJECT_NAME, "a project")
@@ -1481,32 +1495,7 @@ mod tests {
         );
     }
 
-    #[wasm_bindgen_test]
-    fn resolve_amount_form_should_return_amount() {
-        let form = empty_form();
-        form.append_with_str(FACTURE_AMOUNT, "12.43").unwrap();
-        assert_eq!(resolve_amount_form(&form), Ok(12.43));
-    }
-
-    #[wasm_bindgen_test]
-    fn resolve_amount_form_should_return_get_error() {
-        let form = empty_form();
-        form.append_with_str("wrong_key", "12.43").unwrap();
-        assert_eq!(
-            resolve_amount_form(&form),
-            Err("Failed to get factureAmount".to_string())
-        );
-    }
-
-    #[wasm_bindgen_test]
-    fn resolve_amount_form_should_return_parse_error() {
-        let form = empty_form();
-        form.append_with_str(FACTURE_AMOUNT, "abc").unwrap();
-        assert_eq!(
-            resolve_amount_form(&form),
-            Err("factureAmount can't be parsed to f64".to_string())
-        );
-    }
+    // TODO: tests on services
 
     #[wasm_bindgen_test]
     fn resolve_project_bank_form_should_return_bank() {
