@@ -21,6 +21,9 @@ pub fn receipt_generated_component() -> Html {
         };
     }
     let facture = facture_result.unwrap();
+    let total_amount: f64 = Vec::from_iter(facture.services.values().cloned())
+        .iter()
+        .sum();
     html! {
         <>
             <table>
@@ -52,11 +55,15 @@ pub fn receipt_generated_component() -> Html {
                     </div>
                     <table>
                         <tr class="greenBackground"><th>{"Désignation"}</th><th>{"Qté."}</th><th>{"Prix unitaire HT"}</th><th>{"Montant HT"}</th></tr>
-                        <tr class="designationLine"><td>{"Service vendu"}</td><td>{"1"}</td><td>{facture.amount}</td><td>{facture.amount}</td></tr>
+                        {
+                            facture.services.into_iter().map( |(name, amount)| {
+                                html!{<tr class="designationLine"><td>{name}</td><td>{"1"}</td><td>{amount}</td><td>{amount}</td></tr>}
+                            }).collect::<Html>()
+                        }
                     </table>
                     <table id="TotalFactureRight">
-                        <tr><td>{"Total HT"}</td><td>{facture.amount}</td></tr>
-                        <tr class="greenBackground"><td>{"Total TTC"}</td><td>{facture.amount}</td></tr>
+                        <tr><td>{"Total HT"}</td><td>{total_amount}</td></tr>
+                        <tr class="greenBackground"><td>{"Total TTC"}</td><td>{total_amount}</td></tr>
                     </table>
                     <div id="receiptAboveFooter">
                         <div>{"Total net de TVA"}</div>

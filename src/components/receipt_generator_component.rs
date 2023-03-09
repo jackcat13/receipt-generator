@@ -1,15 +1,22 @@
 use chrono::Local;
-use web_sys::{FormData, HtmlFormElement, SubmitEvent};
+use gloo::utils::document;
+use web_sys::{Element, FormData, HtmlFormElement, Node, SubmitEvent};
 use yew::{function_component, html, use_state, Html, TargetCast};
 use yew_router::prelude::use_navigator;
 
 use crate::{components::constants::*, model::facture_dto::FactureDto, Route};
+
+const NOM_SERVICE: &str = "Nom du service";
 
 #[function_component(ReceiptGeneratorComponent)]
 pub fn receipt_generator_component() -> Html {
     let navigator = use_navigator().expect("Failed to use location");
     let facture_error_handle = use_state(|| "".to_string());
     let facture_error = (*facture_error_handle).clone();
+    let handle_add_service = move |_| {
+        let element = document().get_element_by_id(FACTURE_FORM);
+        add_service_in_form(element);
+    };
     let handle_submit = move |event: SubmitEvent| {
         event.prevent_default();
         let form_element: HtmlFormElement = event
@@ -28,7 +35,7 @@ pub fn receipt_generator_component() -> Html {
     };
     html! {
         <>
-            <form id="factureForm" onsubmit={handle_submit}>
+            <form id={FACTURE_FORM} onsubmit={handle_submit}>
                 <div><label for={FACTURE_NUMBER_QUERY}>{"Numéro de facture"}</label></div>
                 <div><input id={FACTURE_NUMBER_QUERY} name={FACTURE_NUMBER_QUERY} value={"0"}/></div>
                 <div><label for={FACTURE_DATE_QUERY}>{"Date de facture"}</label></div>
@@ -62,19 +69,60 @@ pub fn receipt_generator_component() -> Html {
                 <div><input id={FACTURE_CLIENT_TVA_INTRACOMMUNAUTAIRE} name={FACTURE_CLIENT_TVA_INTRACOMMUNAUTAIRE} /></div>
                 <div><label for={FACTURE_CLIENT_DEVIS}>{"Devis client"}</label></div>
                 <div><input id={FACTURE_CLIENT_DEVIS} name={FACTURE_CLIENT_DEVIS} /></div>
-                <div><label for={FACTURE_AMOUNT}>{"Coût de la prestation"}</label></div>
-                <div><input id={FACTURE_AMOUNT} name={FACTURE_AMOUNT} value={"40.0"} /></div>
                 <div><label for={FACTURE_PROJECT_BANK}>{"Banque du project"}</label></div>
                 <div><input id={FACTURE_PROJECT_BANK} name={FACTURE_PROJECT_BANK} /></div>
                 <div><label for={FACTURE_PROJECT_IBAN}>{"Iban du project"}</label></div>
                 <div><input id={FACTURE_PROJECT_IBAN} name={FACTURE_PROJECT_IBAN} /></div>
                 <div><label for={FACTURE_PROJECT_BIC}>{"Bic du projet"}</label></div>
                 <div><input id={FACTURE_PROJECT_BIC} name={FACTURE_PROJECT_BIC} /></div>
-                <div></div>
-                <div></div>
-                <div><input type="submit" id="factureGenerateButton" class="button" value="Générer"/></div>
+                <div><span onclick={handle_add_service} class="button">{"Ajouter service"}</span></div><div></div><div></div><div></div>
+                <div><label for={FACTURE_SERVICE}>{"Nom du service"}</label></div>
+                <div><input class={FACTURE_SERVICE} name={FACTURE_SERVICE} /></div>
+                <div><label for={FACTURE_SERVICE_AMOUNT}>{MONTANT}</label></div>
+                <div><input class={FACTURE_SERVICE_AMOUNT} name={FACTURE_SERVICE_AMOUNT} /></div>
+                <div id={FACTURE_GENERATE_BUTTON_DIV}><input type="submit" id={FACTURE_GENERATE_BUTTON} class="button" value="Générer"/></div>
                 <div id="factureError">{facture_error.to_string()}</div>
             </form>
         </>
+    }
+}
+
+fn add_service_in_form(form_element: Option<Element>) {
+    if let Some(form_element) = form_element {
+        let document = document();
+        let generate_button: Node = document
+            .get_element_by_id(FACTURE_GENERATE_BUTTON_DIV)
+            .unwrap()
+            .into();
+        let label_service = document.create_element("label").unwrap();
+        label_service.set_attribute("for", FACTURE_SERVICE).unwrap();
+        label_service.set_inner_html(NOM_SERVICE);
+        let input_service = document.create_element("input").unwrap();
+        input_service
+            .set_attribute("name", FACTURE_SERVICE)
+            .unwrap();
+        input_service.set_class_name(FACTURE_SERVICE);
+        let label_amount = document.create_element("label").unwrap();
+        label_amount
+            .set_attribute("for", FACTURE_SERVICE_AMOUNT)
+            .unwrap();
+        label_amount.set_inner_html(MONTANT);
+        let input_amount = document.create_element("input").unwrap();
+        input_amount
+            .set_attribute("name", FACTURE_SERVICE_AMOUNT)
+            .unwrap();
+        input_amount.set_class_name(FACTURE_SERVICE_AMOUNT);
+        form_element
+            .insert_before(&label_service, Option::from(&generate_button))
+            .unwrap();
+        form_element
+            .insert_before(&input_service, Option::from(&generate_button))
+            .unwrap();
+        form_element
+            .insert_before(&label_amount, Option::from(&generate_button))
+            .unwrap();
+        form_element
+            .insert_before(&input_amount, Option::from(&generate_button))
+            .unwrap();
     }
 }
