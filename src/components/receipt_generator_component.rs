@@ -4,7 +4,11 @@ use web_sys::{Element, FormData, HtmlFormElement, Node, SubmitEvent};
 use yew::{function_component, html, use_state, Html, TargetCast};
 use yew_router::prelude::use_navigator;
 
-use crate::{components::constants::*, model::facture_dto::FactureDto, Route};
+use crate::{
+    components::{constants::*, helpers::may_resolve_local_field},
+    model::facture_dto::FactureDto,
+    Route,
+};
 
 const NOM_SERVICE: &str = "Nom du service";
 
@@ -37,7 +41,7 @@ pub fn receipt_generator_component() -> Html {
         <>
             <form id={FACTURE_FORM} onsubmit={handle_submit}>
                 <div><label for={FACTURE_NUMBER_QUERY}>{"Numéro de facture"}</label></div>
-                <div><input id={FACTURE_NUMBER_QUERY} name={FACTURE_NUMBER_QUERY} value={"0"}/></div>
+                <div><input id={FACTURE_NUMBER_QUERY} name={FACTURE_NUMBER_QUERY} value={may_resolve_local_field(FACTURE_NUMBER_QUERY)}/></div>
                 <div><label for={FACTURE_DATE_QUERY}>{"Date de facture"}</label></div>
                 <div><input id={FACTURE_DATE_QUERY} name={FACTURE_DATE_QUERY} value={Local::now().format("%d/%m/%Y").to_string()}/></div>
                 <div><label for={FACTURE_DATE_EMITED_QUERY}>{"Émis le"}</label></div>
@@ -50,31 +54,31 @@ pub fn receipt_generator_component() -> Html {
                 <div><label for={FACTURE_IS_PAID}>{"Payé?"}</label></div>
                 <div><input type="checkbox" class="checkbox" id={FACTURE_IS_PAID} name={FACTURE_IS_PAID} checked={false} /></div>
                 <div><label for={FACTURE_PROJECT_NAME}>{"Nom du projet"}</label></div>
-                <div><input id={FACTURE_PROJECT_NAME} name={FACTURE_PROJECT_NAME} /></div>
+                <div><input id={FACTURE_PROJECT_NAME} name={FACTURE_PROJECT_NAME} value={may_resolve_local_field(FACTURE_PROJECT_NAME)} /></div>
                 <div><label for={FACTURE_PROJECT_ADRESS}>{"Adresse de facturation"}</label></div>
-                <div><textarea id={FACTURE_PROJECT_ADRESS} name={FACTURE_PROJECT_ADRESS} /></div>
+                <div><textarea id={FACTURE_PROJECT_ADRESS} name={FACTURE_PROJECT_ADRESS} value={may_resolve_local_field(FACTURE_PROJECT_ADRESS)} /></div>
                 <div><label for={FACTURE_PROJECT_EMAIL}>{"Email du projet"}</label></div>
-                <div><input id={FACTURE_PROJECT_EMAIL} name={FACTURE_PROJECT_EMAIL} placeholder="de la forme project@site.com"/></div>
+                <div><input id={FACTURE_PROJECT_EMAIL} name={FACTURE_PROJECT_EMAIL} value={may_resolve_local_field(FACTURE_PROJECT_EMAIL)} placeholder="de la forme project@site.com"/></div>
                 <div><label for={FACTURE_PROJECT_TEL}>{"Tel du projet"}</label></div>
-                <div><input id={FACTURE_PROJECT_TEL} name={FACTURE_PROJECT_TEL} /></div>
+                <div><input id={FACTURE_PROJECT_TEL} name={FACTURE_PROJECT_TEL} value={may_resolve_local_field(FACTURE_PROJECT_TEL)} /></div>
                 <div><label for={FACTURE_PROJECT_WEBSITE}>{"Site web du projet"}</label></div>
-                <div><input id={FACTURE_PROJECT_WEBSITE} name={FACTURE_PROJECT_WEBSITE} /></div>
+                <div><input id={FACTURE_PROJECT_WEBSITE} name={FACTURE_PROJECT_WEBSITE} value={may_resolve_local_field(FACTURE_PROJECT_WEBSITE)} /></div>
                 <div><label for={FACTURE_CLIENT_NAME}>{"Nom du client/de l'entreprise"}</label></div>
-                <div><input id={FACTURE_CLIENT_NAME} name={FACTURE_CLIENT_NAME} /></div>
+                <div><input id={FACTURE_CLIENT_NAME} name={FACTURE_CLIENT_NAME} value={may_resolve_local_field(FACTURE_CLIENT_NAME)} /></div>
                 <div><label for={FACTURE_CLIENT_ADRESS}>{"Adresse client"}</label></div>
-                <div><textarea id={FACTURE_CLIENT_ADRESS} name={FACTURE_CLIENT_ADRESS} /></div>
+                <div><textarea id={FACTURE_CLIENT_ADRESS} name={FACTURE_CLIENT_ADRESS} value={may_resolve_local_field(FACTURE_CLIENT_ADRESS)} /></div>
                 <div><label for={FACTURE_CLIENT_TEL}>{"Tel client"}</label></div>
-                <div><input id={FACTURE_CLIENT_TEL} name={FACTURE_CLIENT_TEL} /></div>
+                <div><input id={FACTURE_CLIENT_TEL} name={FACTURE_CLIENT_TEL} value={may_resolve_local_field(FACTURE_CLIENT_TEL)} /></div>
                 <div><label for={FACTURE_CLIENT_TVA_INTRACOMMUNAUTAIRE}>{"Tva intracommunautaire client"}</label></div>
-                <div><input id={FACTURE_CLIENT_TVA_INTRACOMMUNAUTAIRE} name={FACTURE_CLIENT_TVA_INTRACOMMUNAUTAIRE} /></div>
+                <div><input id={FACTURE_CLIENT_TVA_INTRACOMMUNAUTAIRE} name={FACTURE_CLIENT_TVA_INTRACOMMUNAUTAIRE} value={may_resolve_local_field(FACTURE_CLIENT_TVA_INTRACOMMUNAUTAIRE)} /></div>
                 <div><label for={FACTURE_CLIENT_DEVIS}>{"Devis client"}</label></div>
-                <div><input id={FACTURE_CLIENT_DEVIS} name={FACTURE_CLIENT_DEVIS} /></div>
+                <div><input id={FACTURE_CLIENT_DEVIS} name={FACTURE_CLIENT_DEVIS} value={may_resolve_local_field(FACTURE_CLIENT_DEVIS)} /></div>
                 <div><label for={FACTURE_PROJECT_BANK}>{"Banque du project"}</label></div>
-                <div><input id={FACTURE_PROJECT_BANK} name={FACTURE_PROJECT_BANK} /></div>
+                <div><input id={FACTURE_PROJECT_BANK} name={FACTURE_PROJECT_BANK} value={may_resolve_local_field(FACTURE_PROJECT_BANK)} /></div>
                 <div><label for={FACTURE_PROJECT_IBAN}>{"Iban du project"}</label></div>
-                <div><input id={FACTURE_PROJECT_IBAN} name={FACTURE_PROJECT_IBAN} /></div>
+                <div><input id={FACTURE_PROJECT_IBAN} name={FACTURE_PROJECT_IBAN} value={may_resolve_local_field(FACTURE_PROJECT_IBAN)} /></div>
                 <div><label for={FACTURE_PROJECT_BIC}>{"Bic du projet"}</label></div>
-                <div><input id={FACTURE_PROJECT_BIC} name={FACTURE_PROJECT_BIC} /></div>
+                <div><input id={FACTURE_PROJECT_BIC} name={FACTURE_PROJECT_BIC} value={may_resolve_local_field(FACTURE_PROJECT_BIC)} /></div>
                 <div><span onclick={handle_add_service} class="button">{"Ajouter service"}</span></div><div></div><div></div><div></div>
                 <div><label for={FACTURE_SERVICE}>{"Nom du service"}</label></div>
                 <div><input class={FACTURE_SERVICE} name={FACTURE_SERVICE} /></div>
