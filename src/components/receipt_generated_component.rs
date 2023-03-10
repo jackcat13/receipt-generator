@@ -4,6 +4,8 @@ use yew_router::prelude::use_location;
 
 use crate::model::facture_dto::FactureDto;
 
+use super::{constants::*, helpers::local_storage};
+
 #[function_component(ReceiptGeneratedComponent)]
 pub fn receipt_generated_component() -> Html {
     let location = use_location().expect("Could not resolve location");
@@ -20,6 +22,7 @@ pub fn receipt_generated_component() -> Html {
         };
     }
     let facture = facture_result.unwrap();
+    fill_local_storage(&facture);
     let total_amount: f64 = Vec::from_iter(facture.services.values().cloned())
         .iter()
         .sum();
@@ -81,4 +84,50 @@ pub fn receipt_generated_component() -> Html {
             </footer>
         </>
     }
+}
+
+fn fill_local_storage(facture: &FactureDto) {
+    let local_storage = local_storage();
+    local_storage
+        .set_item(FACTURE_NUMBER_QUERY, &facture.number.to_string())
+        .unwrap();
+    local_storage
+        .set_item(FACTURE_PROJECT_NAME, &facture.project_name)
+        .unwrap();
+    local_storage
+        .set_item(FACTURE_PROJECT_ADRESS, &facture.project_adress)
+        .unwrap();
+    local_storage
+        .set_item(FACTURE_PROJECT_EMAIL, &facture.project_mail)
+        .unwrap();
+    local_storage
+        .set_item(FACTURE_PROJECT_TEL, &facture.project_tel)
+        .unwrap();
+    local_storage
+        .set_item(FACTURE_PROJECT_WEBSITE, &facture.project_website)
+        .unwrap();
+    local_storage
+        .set_item(FACTURE_CLIENT_NAME, &facture.client_name)
+        .unwrap();
+    local_storage
+        .set_item(FACTURE_CLIENT_ADRESS, &facture.client_adress)
+        .unwrap();
+    local_storage
+        .set_item(FACTURE_CLIENT_TEL, &facture.client_tel)
+        .unwrap();
+    local_storage
+        .set_item(FACTURE_CLIENT_TVA_INTRACOMMUNAUTAIRE, &facture.client_tva)
+        .unwrap();
+    local_storage
+        .set_item(FACTURE_CLIENT_DEVIS, &facture.client_devis)
+        .unwrap();
+    local_storage
+        .set_item(FACTURE_PROJECT_BANK, &facture.project_bank)
+        .unwrap();
+    local_storage
+        .set_item(FACTURE_PROJECT_IBAN, &facture.project_iban)
+        .unwrap();
+    local_storage
+        .set_item(FACTURE_PROJECT_BIC, &facture.project_bic)
+        .unwrap();
 }
