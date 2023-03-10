@@ -1,5 +1,4 @@
-use std::collections::HashMap;
-
+use linked_hash_map::LinkedHashMap;
 use yew::{function_component, html, Html};
 use yew_router::prelude::use_location;
 
@@ -8,7 +7,7 @@ use crate::model::facture_dto::FactureDto;
 #[function_component(ReceiptGeneratedComponent)]
 pub fn receipt_generated_component() -> Html {
     let location = use_location().expect("Could not resolve location");
-    let queries: HashMap<String, String> =
+    let queries: LinkedHashMap<String, String> =
         location.query().expect("Could not retrieve get parameters");
     let facture_result = FactureDto::from_queries(&queries);
     if facture_result.is_err() {
