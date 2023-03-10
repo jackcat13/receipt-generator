@@ -1,6 +1,6 @@
-use std::collections::HashMap;
-
 use chrono::NaiveDate;
+use gloo::console::debug;
+use linked_hash_map::LinkedHashMap;
 use regex::Regex;
 use web_sys::FormData;
 
@@ -23,7 +23,7 @@ pub struct FactureDto {
     pub client_tel: String,
     pub client_tva: String,
     pub client_devis: String,
-    pub services: HashMap<String, f64>,
+    pub services: LinkedHashMap<String, f64>,
     pub project_bank: String,
     pub project_iban: String,
     pub project_bic: String,
@@ -94,7 +94,7 @@ impl FactureDto {
         Ok(facture_dto)
     }
 
-    pub fn from_queries(queries: &HashMap<String, String>) -> Result<FactureDto, String> {
+    pub fn from_queries(queries: &LinkedHashMap<String, String>) -> Result<FactureDto, String> {
         let queries = queries.clone();
         let number = resolve_number_queries(&queries);
         number.clone()?;
@@ -158,8 +158,8 @@ impl FactureDto {
         Ok(facture_dto)
     }
 
-    pub fn to_queries(&self) -> HashMap<String, String> {
-        let mut queries = HashMap::new();
+    pub fn to_queries(&self) -> LinkedHashMap<String, String> {
+        let mut queries = LinkedHashMap::new();
         let facture = self.clone();
         queries.insert(FACTURE_NUMBER_QUERY.to_string(), facture.number.to_string());
         queries.insert(
@@ -207,7 +207,7 @@ fn resolve_number_form(form_data: &FormData) -> Result<usize, String> {
     }
 }
 
-fn resolve_number_queries(queries: &HashMap<String, String>) -> Result<usize, String> {
+fn resolve_number_queries(queries: &LinkedHashMap<String, String>) -> Result<usize, String> {
     let number_str = queries.get(FACTURE_NUMBER_QUERY);
     if let Some(number_str) = number_str {
         number_str
@@ -228,7 +228,7 @@ fn resolve_date_form(form_data: &FormData, form_field: &str) -> Result<NaiveDate
 }
 
 fn resolve_date_queries(
-    queries: &HashMap<String, String>,
+    queries: &LinkedHashMap<String, String>,
     queries_field: &str,
 ) -> Result<NaiveDate, String> {
     let date_str = queries.get(queries_field);
@@ -251,7 +251,7 @@ fn resolve_acompte_form(form_data: &FormData) -> Result<String, String> {
     acompte_check(acompte_str)
 }
 
-fn resolve_acompte_queries(queries: &HashMap<String, String>) -> Result<String, String> {
+fn resolve_acompte_queries(queries: &LinkedHashMap<String, String>) -> Result<String, String> {
     let acompte_str = queries.get(FACTURE_ACOMPTE);
     if let Some(acompte_str) = acompte_str {
         acompte_check(Option::from(acompte_str.to_string()))
@@ -285,7 +285,7 @@ fn resolve_is_paid_form(form_data: &FormData) -> Result<bool, String> {
     }
 }
 
-fn resolve_is_paid_queries(queries: &HashMap<String, String>) -> Result<bool, String> {
+fn resolve_is_paid_queries(queries: &LinkedHashMap<String, String>) -> Result<bool, String> {
     let is_paid_str = queries.get(FACTURE_IS_PAID);
     if let Some(is_paid_str) = is_paid_str {
         if is_paid_str == "true" {
@@ -303,7 +303,7 @@ fn resolve_project_name_form(form_data: &FormData) -> Result<String, String> {
     not_empty_check(project_name_str, FACTURE_PROJECT_NAME)
 }
 
-fn resolve_project_name_queries(queries: &HashMap<String, String>) -> Result<String, String> {
+fn resolve_project_name_queries(queries: &LinkedHashMap<String, String>) -> Result<String, String> {
     let project_name_str = queries.get(FACTURE_PROJECT_NAME);
     if let Some(project_name_str) = project_name_str {
         not_empty_check(
@@ -331,7 +331,9 @@ fn resolve_project_adress_form(form_data: &FormData) -> Result<String, String> {
     not_empty_check(project_adress_str, FACTURE_PROJECT_ADRESS)
 }
 
-fn resolve_project_adress_queries(queries: &HashMap<String, String>) -> Result<String, String> {
+fn resolve_project_adress_queries(
+    queries: &LinkedHashMap<String, String>,
+) -> Result<String, String> {
     let project_adress_str = queries.get(FACTURE_PROJECT_ADRESS);
     if let Some(project_adress_str) = project_adress_str {
         not_empty_check(
@@ -348,7 +350,7 @@ fn resolve_project_mail_form(form_data: &FormData) -> Result<String, String> {
     email_check(project_mail_str, FACTURE_PROJECT_EMAIL)
 }
 
-fn resolve_project_mail_queries(queries: &HashMap<String, String>) -> Result<String, String> {
+fn resolve_project_mail_queries(queries: &LinkedHashMap<String, String>) -> Result<String, String> {
     let project_mail_str = queries.get(FACTURE_PROJECT_EMAIL);
     if let Some(project_mail_str) = project_mail_str {
         email_check(
@@ -382,7 +384,7 @@ fn resolve_project_tel_form(form_data: &FormData) -> Result<String, String> {
     not_empty_check(project_tel_str, FACTURE_PROJECT_TEL)
 }
 
-fn resolve_project_tel_queries(queries: &HashMap<String, String>) -> Result<String, String> {
+fn resolve_project_tel_queries(queries: &LinkedHashMap<String, String>) -> Result<String, String> {
     let project_tel_str = queries.get(FACTURE_PROJECT_TEL);
     if let Some(project_tel_str) = project_tel_str {
         not_empty_check(
@@ -399,7 +401,9 @@ fn resolve_project_website_form(form_data: &FormData) -> Result<String, String> 
     project_website_str.ok_or(format!("Failed to get {FACTURE_PROJECT_WEBSITE}"))
 }
 
-fn resolve_project_website_queries(queries: &HashMap<String, String>) -> Result<String, String> {
+fn resolve_project_website_queries(
+    queries: &LinkedHashMap<String, String>,
+) -> Result<String, String> {
     let project_website_str = queries.get(FACTURE_PROJECT_WEBSITE);
     if let Some(project_website_str) = project_website_str {
         Ok(project_website_str.to_string())
@@ -413,7 +417,7 @@ fn resolve_client_name_form(form_data: &FormData) -> Result<String, String> {
     not_empty_check(client_name_str, FACTURE_CLIENT_NAME)
 }
 
-fn resolve_client_name_queries(queries: &HashMap<String, String>) -> Result<String, String> {
+fn resolve_client_name_queries(queries: &LinkedHashMap<String, String>) -> Result<String, String> {
     let client_name_str = queries.get(FACTURE_CLIENT_NAME);
     if let Some(client_name_str) = client_name_str {
         not_empty_check(
@@ -430,7 +434,9 @@ fn resolve_client_adress_form(form_data: &FormData) -> Result<String, String> {
     not_empty_check(client_adress_str, FACTURE_CLIENT_ADRESS)
 }
 
-fn resolve_client_adress_queries(queries: &HashMap<String, String>) -> Result<String, String> {
+fn resolve_client_adress_queries(
+    queries: &LinkedHashMap<String, String>,
+) -> Result<String, String> {
     let client_adress_str = queries.get(FACTURE_CLIENT_ADRESS);
     if let Some(client_adress_str) = client_adress_str {
         not_empty_check(
@@ -447,7 +453,7 @@ fn resolve_client_tel_form(form_data: &FormData) -> Result<String, String> {
     not_empty_check(client_tel_str, FACTURE_CLIENT_TEL)
 }
 
-fn resolve_client_tel_queries(queries: &HashMap<String, String>) -> Result<String, String> {
+fn resolve_client_tel_queries(queries: &LinkedHashMap<String, String>) -> Result<String, String> {
     let client_tel_str = queries.get(FACTURE_CLIENT_TEL);
     if let Some(client_tel_str) = client_tel_str {
         not_empty_check(Option::from(client_tel_str.to_string()), FACTURE_CLIENT_TEL)
@@ -463,7 +469,7 @@ fn resolve_client_tva_form(form_data: &FormData) -> Result<String, String> {
     not_empty_check(client_tva_str, FACTURE_CLIENT_TVA_INTRACOMMUNAUTAIRE)
 }
 
-fn resolve_client_tva_queries(queries: &HashMap<String, String>) -> Result<String, String> {
+fn resolve_client_tva_queries(queries: &LinkedHashMap<String, String>) -> Result<String, String> {
     let client_tva_str = queries.get(FACTURE_CLIENT_TVA_INTRACOMMUNAUTAIRE);
     if let Some(client_tva_str) = client_tva_str {
         not_empty_check(
@@ -482,7 +488,7 @@ fn resolve_client_devis_form(form_data: &FormData) -> Result<String, String> {
     not_empty_check(client_devis_str, FACTURE_CLIENT_DEVIS)
 }
 
-fn resolve_client_devis_queries(queries: &HashMap<String, String>) -> Result<String, String> {
+fn resolve_client_devis_queries(queries: &LinkedHashMap<String, String>) -> Result<String, String> {
     let client_devis_str = queries.get(FACTURE_CLIENT_DEVIS);
     if let Some(client_devis_str) = client_devis_str {
         not_empty_check(
@@ -494,11 +500,11 @@ fn resolve_client_devis_queries(queries: &HashMap<String, String>) -> Result<Str
     }
 }
 
-fn resolve_services_form(form_data: &FormData) -> Result<HashMap<String, f64>, String> {
+fn resolve_services_form(form_data: &FormData) -> Result<LinkedHashMap<String, f64>, String> {
     let services_names = form_data.get_all(FACTURE_SERVICE);
     let services_amounts = form_data.get_all(FACTURE_SERVICE_AMOUNT);
     if services_names.length() == services_amounts.length() {
-        let mut services_map = HashMap::<String, f64>::new();
+        let mut services_map = LinkedHashMap::<String, f64>::new();
         let names = services_names.iter();
         let mut amounts = services_amounts.iter();
         for name in names {
@@ -510,6 +516,7 @@ fn resolve_services_form(form_data: &FormData) -> Result<HashMap<String, f64>, S
                 .parse::<f64>()
                 .unwrap();
             services_map.insert(name.as_string().unwrap(), amount);
+            debug!(name.as_string().unwrap());
         }
         Ok(services_map)
     } else {
@@ -520,8 +527,8 @@ fn resolve_services_form(form_data: &FormData) -> Result<HashMap<String, f64>, S
 }
 
 fn resolve_services_queries(
-    queries: &HashMap<String, String>,
-) -> Result<HashMap<String, f64>, String> {
+    queries: &LinkedHashMap<String, String>,
+) -> Result<LinkedHashMap<String, f64>, String> {
     Ok(serde_json::from_str(queries.get(FACTURE_SERVICES).unwrap()).unwrap())
 }
 
@@ -530,7 +537,7 @@ fn resolve_project_bank_form(form_data: &FormData) -> Result<String, String> {
     not_empty_check(bank_str, FACTURE_PROJECT_BANK)
 }
 
-fn resolve_project_bank_queries(queries: &HashMap<String, String>) -> Result<String, String> {
+fn resolve_project_bank_queries(queries: &LinkedHashMap<String, String>) -> Result<String, String> {
     let bank_str = queries.get(FACTURE_PROJECT_BANK);
     if let Some(bank_str) = bank_str {
         not_empty_check(Option::from(bank_str.to_string()), FACTURE_PROJECT_BANK)
@@ -544,7 +551,7 @@ fn resolve_project_iban_form(form_data: &FormData) -> Result<String, String> {
     not_empty_check(iban_str, FACTURE_PROJECT_IBAN)
 }
 
-fn resolve_project_iban_queries(queries: &HashMap<String, String>) -> Result<String, String> {
+fn resolve_project_iban_queries(queries: &LinkedHashMap<String, String>) -> Result<String, String> {
     let iban_str = queries.get(FACTURE_PROJECT_IBAN);
     if let Some(iban_str) = iban_str {
         not_empty_check(Option::from(iban_str.to_string()), FACTURE_PROJECT_IBAN)
@@ -558,7 +565,7 @@ fn resolve_project_bic_form(form_data: &FormData) -> Result<String, String> {
     not_empty_check(bic_str, FACTURE_PROJECT_BIC)
 }
 
-fn resolve_project_bic_queries(queries: &HashMap<String, String>) -> Result<String, String> {
+fn resolve_project_bic_queries(queries: &LinkedHashMap<String, String>) -> Result<String, String> {
     let bic_str = queries.get(FACTURE_PROJECT_BIC);
     if let Some(bic_str) = bic_str {
         not_empty_check(Option::from(bic_str.to_string()), FACTURE_PROJECT_BIC)
@@ -611,7 +618,7 @@ mod tests {
         form.append_with_str(FACTURE_SERVICE, "un service").unwrap();
         form.append_with_str(FACTURE_SERVICE_AMOUNT, "40.12")
             .unwrap();
-        let mut services_map = HashMap::<String, f64>::new();
+        let mut services_map = LinkedHashMap::<String, f64>::new();
         services_map.insert("un service".to_string(), 40.12);
         let expected_dto = FactureDto {
             number: 123,
@@ -1691,7 +1698,7 @@ mod tests {
         FormData::new().unwrap()
     }
 
-    fn empty_queries() -> HashMap<String, String> {
-        HashMap::<String, String>::new()
+    fn empty_queries() -> LinkedHashMap<String, String> {
+        LinkedHashMap::<String, String>::new()
     }
 }
