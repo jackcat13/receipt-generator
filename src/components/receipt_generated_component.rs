@@ -32,7 +32,7 @@ pub fn receipt_generated_component() -> Html {
                 <thead><th><td><div class="emptyHeader"></div></td></th></thead>
                 <tbody><tr><td><div class="content">
                     <div id="generatedReceipt">
-                    <img id="logo" src={"https://media.discordapp.net/attachments/1074719812871258122/1078671377005027428/image.png"} />
+                    <img id="logo" src={facture.logo_url} />
                     if facture.is_paid {
                         <div id="paid">{"PAYÉ"}</div>
                     }
@@ -88,6 +88,9 @@ pub fn receipt_generated_component() -> Html {
 
 fn fill_local_storage(facture: &FactureDto) {
     let local_storage = local_storage();
+    local_storage
+        .set_item(FACTURE_LOGO_URL, &facture.logo_url.to_string())
+        .unwrap();
     local_storage
         .set_item(FACTURE_NUMBER_QUERY, &facture.number.to_string())
         .unwrap();

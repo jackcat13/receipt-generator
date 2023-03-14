@@ -8,6 +8,7 @@ use crate::components::constants::*;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct FactureDto {
+    pub logo_url: String,
     pub number: usize,
     pub date: NaiveDate,
     pub date_emited: NaiveDate,
@@ -32,6 +33,8 @@ pub struct FactureDto {
 impl FactureDto {
     pub fn from_form_data(form_data: &FormData) -> Result<FactureDto, String> {
         let form_data = form_data.clone();
+        let logo_url = resolve_logo_url_form(&form_data);
+        logo_url.clone()?;
         let number = resolve_number_form(&form_data);
         number.clone()?;
         let date = resolve_date_form(&form_data, FACTURE_DATE_QUERY);
@@ -71,6 +74,7 @@ impl FactureDto {
         let project_bic = resolve_project_bic_form(&form_data);
         project_bic.clone()?;
         let facture_dto = FactureDto {
+            logo_url: logo_url.unwrap(),
             number: number.unwrap(),
             date: date.unwrap(),
             date_emited: date_emited.unwrap(),
@@ -96,6 +100,7 @@ impl FactureDto {
 
     pub fn from_queries(queries: &LinkedHashMap<String, String>) -> Result<FactureDto, String> {
         let queries = queries.clone();
+        let logo_url = resolve_logo_url_queries(&queries);
         let number = resolve_number_queries(&queries);
         number.clone()?;
         let date = resolve_date_queries(&queries, FACTURE_DATE_QUERY);
@@ -135,6 +140,7 @@ impl FactureDto {
         let project_bic = resolve_project_bic_queries(&queries);
         project_bic.clone()?;
         let facture_dto = FactureDto {
+            logo_url: logo_url.unwrap(),
             number: number.unwrap(),
             date: date.unwrap(),
             date_emited: date_emited.unwrap(),
@@ -161,6 +167,7 @@ impl FactureDto {
     pub fn to_queries(&self) -> LinkedHashMap<String, String> {
         let mut queries = LinkedHashMap::new();
         let facture = self.clone();
+        queries.insert(FACTURE_LOGO_URL.to_string(), facture.logo_url.to_string());
         queries.insert(FACTURE_NUMBER_QUERY.to_string(), facture.number.to_string());
         queries.insert(
             FACTURE_DATE_QUERY.to_string(),
@@ -193,6 +200,20 @@ impl FactureDto {
         queries.insert(FACTURE_PROJECT_IBAN.to_string(), facture.project_iban);
         queries.insert(FACTURE_PROJECT_BIC.to_string(), facture.project_bic);
         queries
+    }
+}
+
+fn resolve_logo_url_form(form_data: &FormData) -> Result<String, String> {
+    let logo_str = form_data.get(FACTURE_LOGO_URL).as_string();
+    not_empty_check(logo_str, FACTURE_LOGO_URL)
+}
+
+fn resolve_logo_url_queries(queries: &LinkedHashMap<String, String>) -> Result<String, String> {
+    let logo_str = queries.get(FACTURE_LOGO_URL);
+    if let Some(logo_str) = logo_str {
+        not_empty_check(Option::from(logo_str.to_string()), FACTURE_LOGO_URL)
+    } else {
+        Err(format!("Failed to get {FACTURE_LOGO_URL}"))
     }
 }
 
@@ -577,12 +598,12 @@ fn resolve_project_bic_queries(queries: &LinkedHashMap<String, String>) -> Resul
 #[cfg(test)]
 mod tests {
     use super::*;
-    use serde_json::json;
     use wasm_bindgen_test::*;
 
     #[wasm_bindgen_test]
     fn resolve_facture_dto_from_form_should_return_dto() {
         let form = empty_form();
+        form.append_with_str(FACTURE_LOGO_URL, "https://cdn.discordapp.com/attachments/1074719812871258122/1078671377005027428/image.png").unwrap();
         form.append_with_str(FACTURE_NUMBER_QUERY, "123").unwrap();
         form.append_with_str(FACTURE_DATE_QUERY, "22/02/2022")
             .unwrap();
@@ -621,6 +642,7 @@ mod tests {
         let mut services_map = LinkedHashMap::<String, f64>::new();
         services_map.insert("un service".to_string(), 40.12);
         let expected_dto = FactureDto {
+            logo_url: "https://cdn.discordapp.com/attachments/1074719812871258122/1078671377005027428/image.png".to_string(),
             number: 123,
             date: NaiveDate::from_ymd_opt(2022, 02, 22).unwrap(),
             date_emited: NaiveDate::from_ymd_opt(2022, 02, 23).unwrap(),
@@ -647,6 +669,7 @@ mod tests {
     #[wasm_bindgen_test]
     fn resolve_facture_dto_from_form_should_return_error() {
         let form = empty_form();
+        form.append_with_str(FACTURE_LOGO_URL, "https://cdn.discordapp.com/attachments/1074719812871258122/1078671377005027428/image.png").unwrap();
         form.append_with_str(FACTURE_NUMBER_QUERY, "abc").unwrap();
         form.append_with_str(FACTURE_DATE_QUERY, "22/02/2022")
             .unwrap();
@@ -682,6 +705,60 @@ mod tests {
         assert_eq!(
             FactureDto::from_form_data(&form),
             Err("Failed to parse abc into usize".to_string())
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_logo_url_form_should_return_url() {
+        let form = empty_form();
+        form.append_with_str(FACTURE_LOGO_URL, "https://cdn.discordapp.com/attachments/1074719812871258122/1078671377005027428/image.png").unwrap();
+        assert_eq!(resolve_logo_url_form(&form), Ok("https://cdn.discordapp.com/attachments/1074719812871258122/1078671377005027428/image.png".to_string()));
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_logo_url_form_should_return_get_error_when_using_wrong_key() {
+        let form = empty_form();
+        form.append_with_str("wrong_key", "https://cdn.discordapp.com/attachments/1074719812871258122/1078671377005027428/image.png").unwrap();
+        assert_eq!(
+            resolve_logo_url_form(&form),
+            Err("Failed to get factureLogoUrl".to_string())
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_logo_url_form_should_return_empty_error() {
+        let form = empty_form();
+        form.append_with_str(FACTURE_LOGO_URL, "").unwrap();
+        assert_eq!(
+            resolve_logo_url_form(&form),
+            Err("factureLogoUrl value can't be null".to_string())
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_logo_url_queries_should_return_url() {
+        let mut queries = empty_queries();
+        queries.insert(FACTURE_LOGO_URL.to_string(), "https://cdn.discordapp.com/attachments/1074719812871258122/1078671377005027428/image.png".to_string());
+        assert_eq!(resolve_logo_url_queries(&queries), Ok("https://cdn.discordapp.com/attachments/1074719812871258122/1078671377005027428/image.png".to_string()));
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_logo_url_queries_should_return_get_error_when_using_wrong_key() {
+        let mut queries = empty_queries();
+        queries.insert("wrong_key".to_string(), "https://cdn.discordapp.com/attachments/1074719812871258122/1078671377005027428/image.png".to_string());
+        assert_eq!(
+            resolve_logo_url_queries(&queries),
+            Err("Failed to get factureLogoUrl".to_string())
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn resolve_logo_url_queries_should_return_empty_error() {
+        let mut queries = empty_queries();
+        queries.insert(FACTURE_LOGO_URL.to_string(), "".to_string());
+        assert_eq!(
+            resolve_logo_url_queries(&queries),
+            Err("factureLogoUrl value can't be null".to_string())
         );
     }
 

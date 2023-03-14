@@ -40,6 +40,8 @@ pub fn receipt_generator_component() -> Html {
     html! {
         <>
             <form id={FACTURE_FORM} onsubmit={handle_submit}>
+                <div><label for={FACTURE_LOGO_URL}>{"Url du logo"}</label></div>
+                <div><input id={FACTURE_LOGO_URL} name={FACTURE_LOGO_URL} value={may_resolve_local_field(FACTURE_LOGO_URL)}/></div>
                 <div><label for={FACTURE_NUMBER_QUERY}>{"Numéro de facture"}</label></div>
                 <div><input id={FACTURE_NUMBER_QUERY} name={FACTURE_NUMBER_QUERY} value={may_resolve_local_field(FACTURE_NUMBER_QUERY)}/></div>
                 <div><label for={FACTURE_DATE_QUERY}>{"Date de facture"}</label></div>
@@ -79,7 +81,7 @@ pub fn receipt_generator_component() -> Html {
                 <div><input id={FACTURE_PROJECT_IBAN} name={FACTURE_PROJECT_IBAN} value={may_resolve_local_field(FACTURE_PROJECT_IBAN)} /></div>
                 <div><label for={FACTURE_PROJECT_BIC}>{"Bic du projet"}</label></div>
                 <div><input id={FACTURE_PROJECT_BIC} name={FACTURE_PROJECT_BIC} value={may_resolve_local_field(FACTURE_PROJECT_BIC)} /></div>
-                <div><span onclick={handle_add_service} class="button">{"Ajouter service"}</span></div><div></div><div></div><div></div>
+                <div></div><div></div><div><span onclick={handle_add_service} class="button">{"Ajouter service"}</span></div><div></div><div></div><div></div>
                 <div><label for={FACTURE_SERVICE}>{"Nom du service"}</label></div>
                 <div><input class={FACTURE_SERVICE} name={FACTURE_SERVICE} /></div>
                 <div><label for={FACTURE_SERVICE_AMOUNT}>{MONTANT}</label></div>
