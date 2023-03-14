@@ -1,4 +1,5 @@
 pub const FACTURE_FORM: &str = "factureForm";
+pub const FACTURE_LOGO_URL: &str = "factureLogoUrl";
 pub const FACTURE_NUMBER_QUERY: &str = "factureNumber";
 pub const FACTURE_DATE_QUERY: &str = "factureDate";
 pub const FACTURE_DATE_EMITED_QUERY: &str = "factureDateEmited";
