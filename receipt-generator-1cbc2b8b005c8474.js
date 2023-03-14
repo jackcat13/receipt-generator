@@ -851,15 +851,15 @@ function getImports() {
         const ret = wasm.memory;
         return addHeapObject(ret);
     };
-    imports.wbg.__wbindgen_closure_wrapper1537 = function(arg0, arg1, arg2) {
+    imports.wbg.__wbindgen_closure_wrapper1539 = function(arg0, arg1, arg2) {
         const ret = makeMutClosure(arg0, arg1, 534, __wbg_adapter_36);
         return addHeapObject(ret);
     };
-    imports.wbg.__wbindgen_closure_wrapper1918 = function(arg0, arg1, arg2) {
+    imports.wbg.__wbindgen_closure_wrapper1920 = function(arg0, arg1, arg2) {
         const ret = makeMutClosure(arg0, arg1, 666, __wbg_adapter_39);
         return addHeapObject(ret);
     };
-    imports.wbg.__wbindgen_closure_wrapper1999 = function(arg0, arg1, arg2) {
+    imports.wbg.__wbindgen_closure_wrapper2001 = function(arg0, arg1, arg2) {
         const ret = makeMutClosure(arg0, arg1, 700, __wbg_adapter_42);
         return addHeapObject(ret);
     };
@@ -899,7 +899,7 @@ function initSync(module) {
 
 async function init(input) {
     if (typeof input === 'undefined') {
-        input = new URL('receipt-generator-bc30c425a9b59427_bg.wasm', import.meta.url);
+        input = new URL('receipt-generator-1cbc2b8b005c8474_bg.wasm', import.meta.url);
     }
     const imports = getImports();
 
