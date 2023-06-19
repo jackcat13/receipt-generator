@@ -12,7 +12,7 @@ js-sys = "0.3.61"
 linked-hash-map = { version = "0.5.6", features = ["serde", "serde_impl"] }
 regex = "1.7.3"
 serde_json = "1.0.96"
-strum = { version = "0.24.1", features = ["derive"] }
+strum = { version = "0.25.0", features = ["derive"] }
 strum_macros = "0.24"
 wasm-bindgen-test = "0.3.34"
 web-sys = { version = "0.3.61", features = ["FormData", "HtmlFormElement"] }
